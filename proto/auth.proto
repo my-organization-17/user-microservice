@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/protobuf/timestamp.proto";
+import "user.proto";
+
+// AuthService defines the gRPC service for authentication.
+service AuthService {
+  // rpc to sign up a user
+  rpc SignUp(SignUpRequest) returns (user.v1.User) {}
+  // rpc to sign in a user
+  rpc SignIn(SignInRequest) returns (user.v1.User) {}
+  // rpc to confirm email
+  rpc ConfirmEmail(Token) returns (user.v1.StatusResponse) {}
+  // rpc to resend confirmation email
+  rpc ResendEmail(user.v1.Email) returns (user.v1.StatusResponse) {}
+  // rpc to reset password
+  rpc ResetPassword(user.v1.Email) returns (user.v1.StatusResponse) {}
+  // rpc to set new password
+  rpc SetNewPassword(SetNewPasswordRequest) returns (user.v1.StatusResponse) {}
+}
+
+// Message for sign up request
+message SignUpRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  optional string phone_number = 4;
+}
+
+// Message for sign in request
+message SignInRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// Message representing a token
+message Token {
+  string token = 1;
+}
+
+// Message for setting a new password
+message SetNewPasswordRequest {
+  string token = 1;
+  string password = 2;
+}
+
+// Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps
+// protoc -I ./proto ./proto/auth.proto --ts_proto_out=./src/generated-types --ts_proto_opt=nestJs=true --ts_proto_opt=useNullAsOptional=true --ts_proto_opt=useDate=true

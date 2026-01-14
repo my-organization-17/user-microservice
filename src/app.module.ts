@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/validators/env-validator';
 import { EnvironmentVariables } from './utils/env.dto';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthCheckModule } from './health-check/health-check.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { PrismaModule } from './prisma/prisma.module';
       validate: (config) => validateEnv(config, EnvironmentVariables),
     }),
     PrismaModule,
+    HealthCheckModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
