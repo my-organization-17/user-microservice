@@ -1,0 +1,61 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "./generated-types"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+  VISITOR
+}
+
+model User {
+  id                      String                   @id @default(uuid())
+  name                    String?
+  email                   String                   @unique
+  phoneNumber             String?                  @map("phone_number")
+  role                    UserRole                 @default(USER)
+  avatarUrl               String?                  @map("avatar_url")
+  passwordHash            String                   @map("password_hash")
+  isEmailVerified         Boolean                  @default(false) @map("is_email_verified")
+  lastLoginAt             DateTime?                @map("last_login_at")
+  isBanned                Boolean                  @default(false)
+  banReason               String?                  @map("ban_reason")
+  bannedAt                DateTime?                @map("banned_at")
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @default(now()) @updatedAt @map("updated_at")
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  changedAt DateTime @map("changed_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  token      String    @unique
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  verifiedAt DateTime? @map("verified_at")
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@map("email_verification_tokens")
+}
