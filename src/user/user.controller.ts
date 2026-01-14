@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 
-import { PasswordRequest, UpdateUserRequest, USER_SERVICE_NAME } from 'src/generated-types/user';
+import { type PasswordRequest, type UpdateUserRequest, USER_SERVICE_NAME } from 'src/generated-types/user';
 import { UserService } from './user.service';
 
 @Controller('user')

@@ -13,17 +13,17 @@ export const protobufPackage = "user.v1";
 
 export interface User {
   id: string;
-  name: string;
+  name?: string | null | undefined;
   email: string;
   phoneNumber?: string | null | undefined;
   role: string;
-  avatarUrl: string;
+  avatarUrl?: string | null | undefined;
   passwordHash: string;
   isEmailVerified: boolean;
-  lastLogin: Date | null;
+  lastLogin?: Date | null | undefined;
   isBanned: boolean;
-  banReason: string;
-  bannedAt: Date | null;
+  banReason?: string | null | undefined;
+  bannedAt?: Date | null | undefined;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

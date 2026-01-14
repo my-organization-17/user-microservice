@@ -31,7 +31,7 @@ model User {
   createdAt               DateTime                 @default(now()) @map("created_at")
   updatedAt               DateTime                 @default(now()) @updatedAt @map("updated_at")
   passwordResetTokens     PasswordResetToken[]
-  emailVerificationTokens EmailVerificationToken[]
+  emailVerificationTokens EmailVerificationToken?
 
   @@map("users")
 }
@@ -50,7 +50,7 @@ model PasswordResetToken {
 
 model EmailVerificationToken {
   id         String    @id @default(uuid())
-  userId     String    @map("user_id")
+  userId     String    @map("user_id") @unique
   token      String    @unique
   expiresAt  DateTime  @map("expires_at")
   createdAt  DateTime  @default(now()) @map("created_at")

@@ -28,17 +28,17 @@ service UserService {
 
 message User {
   string id = 1;
-  string name = 2;
+  optional string name = 2;
   string email = 3;
   optional string phone_number = 4;
   string role = 5;
-  string avatar_url = 6;
+  optional string avatar_url = 6;
   string password_hash = 7;
   bool is_email_verified = 8;
-  google.protobuf.Timestamp last_login = 9; 
+  optional google.protobuf.Timestamp last_login = 9; 
   bool is_banned = 10;
-  string ban_reason = 11;
-  google.protobuf.Timestamp banned_at = 12;
+  optional string ban_reason = 11;
+  optional google.protobuf.Timestamp banned_at = 12;
   google.protobuf.Timestamp created_at = 13;
   google.protobuf.Timestamp updated_at = 14;
 }

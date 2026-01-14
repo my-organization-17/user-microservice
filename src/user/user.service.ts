@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { User } from 'prisma/generated-types/client';
-import { CreateUserRequest, PasswordRequest, StatusResponse, UpdateUserRequest } from 'src/generated-types/user';
-import { PasswordHashService } from 'src/password-hash/password-hash.service';
 
+import { PasswordHashService } from 'src/password-hash/password-hash.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppError } from 'src/utils/errors/app-error';
+
+import type { User } from 'prisma/generated-types/client';
+import type { CreateUserRequest, PasswordRequest, StatusResponse, UpdateUserRequest } from 'src/generated-types/user';
 
 @Injectable()
 export class UserService {
