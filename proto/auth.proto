@@ -11,8 +11,8 @@ service AuthService {
   rpc SignUp(SignUpRequest) returns (user.v1.User) {}
   // rpc to sign in a user
   rpc SignIn(SignInRequest) returns (user.v1.User) {}
-  // rpc to confirm email
-  rpc ConfirmEmail(Token) returns (user.v1.StatusResponse) {}
+  // rpc to verify email
+  rpc VerifyEmail(Token) returns (user.v1.StatusResponse) {}
   // rpc to resend confirmation email
   rpc ResendEmail(user.v1.Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
