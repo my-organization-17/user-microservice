@@ -26,6 +26,7 @@ service UserService {
   rpc ChangePassword(PasswordRequest) returns (StatusResponse) {}
 }
 
+// declaration of User message
 message User {
   string id = 1;
   optional string name = 2;
@@ -39,8 +40,9 @@ message User {
   bool is_banned = 10;
   optional string ban_reason = 11;
   optional google.protobuf.Timestamp banned_at = 12;
-  google.protobuf.Timestamp created_at = 13;
-  google.protobuf.Timestamp updated_at = 14;
+  optional string refresh_token_hash = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
 }
 
 // declaration of Id message

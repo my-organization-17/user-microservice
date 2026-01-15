@@ -4,8 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import { AppModule } from './app.module';
-import { HEALTH_CHECK_V1_PACKAGE_NAME } from './generated-types/health-check';
 import { GrpcExceptionFilter } from './utils/filters/grpc-exception.filter';
+import { HEALTH_CHECK_V1_PACKAGE_NAME } from './generated-types/health-check';
+import { AUTH_V1_PACKAGE_NAME } from './generated-types/auth';
+import { USER_V1_PACKAGE_NAME } from './generated-types/user';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,8 +21,8 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [HEALTH_CHECK_V1_PACKAGE_NAME],
-      protoPath: ['proto/health-check.proto'],
+      package: [HEALTH_CHECK_V1_PACKAGE_NAME, AUTH_V1_PACKAGE_NAME, USER_V1_PACKAGE_NAME],
+      protoPath: ['proto/health-check.proto', 'proto/auth.proto', 'proto/user.proto'],
       url,
     },
   });

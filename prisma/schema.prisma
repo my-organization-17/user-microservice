@@ -16,20 +16,21 @@ enum UserRole {
 }
 
 model User {
-  id                      String                   @id @default(uuid())
+  id                      String                  @id @default(uuid())
   name                    String?
-  email                   String                   @unique
-  phoneNumber             String?                  @map("phone_number")
-  role                    UserRole                 @default(USER)
-  avatarUrl               String?                  @map("avatar_url")
-  passwordHash            String                   @map("password_hash")
-  isEmailVerified         Boolean                  @default(false) @map("is_email_verified")
-  lastLoginAt             DateTime?                @map("last_login_at")
-  isBanned                Boolean                  @default(false)
-  banReason               String?                  @map("ban_reason")
-  bannedAt                DateTime?                @map("banned_at")
-  createdAt               DateTime                 @default(now()) @map("created_at")
-  updatedAt               DateTime                 @default(now()) @updatedAt @map("updated_at")
+  email                   String                  @unique
+  phoneNumber             String?                 @map("phone_number")
+  role                    UserRole                @default(USER)
+  avatarUrl               String?                 @map("avatar_url")
+  passwordHash            String                  @map("password_hash")
+  refreshTokenHash        String?                 @map("refresh_token_hash")
+  isEmailVerified         Boolean                 @default(false) @map("is_email_verified")
+  lastLoginAt             DateTime?               @map("last_login_at")
+  isBanned                Boolean                 @default(false)
+  banReason               String?                 @map("ban_reason")
+  bannedAt                DateTime?               @map("banned_at")
+  createdAt               DateTime                @default(now()) @map("created_at")
+  updatedAt               DateTime                @default(now()) @updatedAt @map("updated_at")
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken?
 
@@ -50,7 +51,7 @@ model PasswordResetToken {
 
 model EmailVerificationToken {
   id         String    @id @default(uuid())
-  userId     String    @map("user_id") @unique
+  userId     String    @unique @map("user_id")
   token      String    @unique
   expiresAt  DateTime  @map("expires_at")
   createdAt  DateTime  @default(now()) @map("created_at")

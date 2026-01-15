@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package auth.v1;
 
-import "google/protobuf/timestamp.proto";
 import "user.proto";
 
 // AuthService defines the gRPC service for authentication.
@@ -10,9 +9,9 @@ service AuthService {
   // rpc to sign up a user
   rpc SignUp(SignUpRequest) returns (user.v1.User) {}
   // rpc to sign in a user
-  rpc SignIn(SignInRequest) returns (user.v1.User) {}
+  rpc SignIn(SignInRequest) returns (AuthResponse) {}
   // rpc to verify email
-  rpc VerifyEmail(Token) returns (user.v1.StatusResponse) {}
+  rpc VerifyEmail(Token) returns (AuthResponse) {}
   // rpc to resend confirmation email
   rpc ResendEmail(user.v1.Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
@@ -23,7 +22,7 @@ service AuthService {
 
 // Message for sign up request
 message SignUpRequest {
-  string name = 1;
+  optional string name = 1;
   string email = 2;
   string password = 3;
   optional string phone_number = 4;
@@ -33,6 +32,13 @@ message SignUpRequest {
 message SignInRequest {
   string email = 1;
   string password = 2;
+}
+
+// Message for sigh in / verify email response containing tokens
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  user.v1.User user = 3;
 }
 
 // Message representing a token

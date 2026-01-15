@@ -32,6 +32,7 @@ export type UserMinAggregateOutputType = {
   role: $Enums.UserRole | null
   avatarUrl: string | null
   passwordHash: string | null
+  refreshTokenHash: string | null
   isEmailVerified: boolean | null
   lastLoginAt: Date | null
   isBanned: boolean | null
@@ -49,6 +50,7 @@ export type UserMaxAggregateOutputType = {
   role: $Enums.UserRole | null
   avatarUrl: string | null
   passwordHash: string | null
+  refreshTokenHash: string | null
   isEmailVerified: boolean | null
   lastLoginAt: Date | null
   isBanned: boolean | null
@@ -66,6 +68,7 @@ export type UserCountAggregateOutputType = {
   role: number
   avatarUrl: number
   passwordHash: number
+  refreshTokenHash: number
   isEmailVerified: number
   lastLoginAt: number
   isBanned: number
@@ -85,6 +88,7 @@ export type UserMinAggregateInputType = {
   role?: true
   avatarUrl?: true
   passwordHash?: true
+  refreshTokenHash?: true
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
@@ -102,6 +106,7 @@ export type UserMaxAggregateInputType = {
   role?: true
   avatarUrl?: true
   passwordHash?: true
+  refreshTokenHash?: true
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
@@ -119,6 +124,7 @@ export type UserCountAggregateInputType = {
   role?: true
   avatarUrl?: true
   passwordHash?: true
+  refreshTokenHash?: true
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
@@ -209,6 +215,7 @@ export type UserGroupByOutputType = {
   role: $Enums.UserRole
   avatarUrl: string | null
   passwordHash: string
+  refreshTokenHash: string | null
   isEmailVerified: boolean
   lastLoginAt: Date | null
   isBanned: boolean
@@ -247,6 +254,7 @@ export type UserWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringFilter<"User"> | string
+  refreshTokenHash?: Prisma.StringNullableFilter<"User"> | string | null
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolFilter<"User"> | boolean
@@ -266,6 +274,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  refreshTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isBanned?: Prisma.SortOrder
@@ -288,6 +297,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringFilter<"User"> | string
+  refreshTokenHash?: Prisma.StringNullableFilter<"User"> | string | null
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolFilter<"User"> | boolean
@@ -307,6 +317,7 @@ export type UserOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  refreshTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isBanned?: Prisma.SortOrder
@@ -330,6 +341,7 @@ export type UserScalarWhereWithAggregatesInput = {
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
+  refreshTokenHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isEmailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -347,6 +359,7 @@ export type UserCreateInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -366,6 +379,7 @@ export type UserUncheckedCreateInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -385,6 +399,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -404,6 +419,7 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -423,6 +439,7 @@ export type UserCreateManyInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -440,6 +457,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -457,6 +475,7 @@ export type UserUncheckedUpdateManyInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -474,6 +493,7 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  refreshTokenHash?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
@@ -491,6 +511,7 @@ export type UserMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  refreshTokenHash?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
@@ -508,6 +529,7 @@ export type UserMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  refreshTokenHash?: Prisma.SortOrder
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
@@ -582,6 +604,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -600,6 +623,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -634,6 +658,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -652,6 +677,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -670,6 +696,7 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -688,6 +715,7 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   role?: $Enums.UserRole
   avatarUrl?: string | null
   passwordHash: string
+  refreshTokenHash?: string | null
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
@@ -722,6 +750,7 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -740,6 +769,7 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -789,6 +819,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   avatarUrl?: boolean
   passwordHash?: boolean
+  refreshTokenHash?: boolean
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
@@ -809,6 +840,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   avatarUrl?: boolean
   passwordHash?: boolean
+  refreshTokenHash?: boolean
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
@@ -826,6 +858,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   avatarUrl?: boolean
   passwordHash?: boolean
+  refreshTokenHash?: boolean
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
@@ -843,6 +876,7 @@ export type UserSelectScalar = {
   role?: boolean
   avatarUrl?: boolean
   passwordHash?: boolean
+  refreshTokenHash?: boolean
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
@@ -852,7 +886,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phoneNumber" | "role" | "avatarUrl" | "passwordHash" | "isEmailVerified" | "lastLoginAt" | "isBanned" | "banReason" | "bannedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phoneNumber" | "role" | "avatarUrl" | "passwordHash" | "refreshTokenHash" | "isEmailVerified" | "lastLoginAt" | "isBanned" | "banReason" | "bannedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
@@ -875,6 +909,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: $Enums.UserRole
     avatarUrl: string | null
     passwordHash: string
+    refreshTokenHash: string | null
     isEmailVerified: boolean
     lastLoginAt: Date | null
     isBanned: boolean
@@ -1314,6 +1349,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly refreshTokenHash: Prisma.FieldRef<"User", 'String'>
   readonly isEmailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly isBanned: Prisma.FieldRef<"User", 'Boolean'>

@@ -11,6 +11,7 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user.v1";
 
+/** declaration of User message */
 export interface User {
   id: string;
   name?: string | null | undefined;
@@ -24,6 +25,7 @@ export interface User {
   isBanned: boolean;
   banReason?: string | null | undefined;
   bannedAt?: Date | null | undefined;
+  refreshTokenHash?: string | null | undefined;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

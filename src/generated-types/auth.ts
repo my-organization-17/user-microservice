@@ -13,7 +13,7 @@ export const protobufPackage = "auth.v1";
 
 /** Message for sign up request */
 export interface SignUpRequest {
-  name: string;
+  name?: string | null | undefined;
   email: string;
   password: string;
   phoneNumber?: string | null | undefined;
@@ -23,6 +23,13 @@ export interface SignUpRequest {
 export interface SignInRequest {
   email: string;
   password: string;
+}
+
+/** Message for sigh in / verify email response containing tokens */
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User | null;
 }
 
 /** Message representing a token */
@@ -47,11 +54,11 @@ export interface AuthServiceClient {
 
   /** rpc to sign in a user */
 
-  signIn(request: SignInRequest): Observable<User>;
+  signIn(request: SignInRequest): Observable<AuthResponse>;
 
   /** rpc to verify email */
 
-  verifyEmail(request: Token): Observable<StatusResponse>;
+  verifyEmail(request: Token): Observable<AuthResponse>;
 
   /** rpc to resend confirmation email */
 
@@ -75,11 +82,11 @@ export interface AuthServiceController {
 
   /** rpc to sign in a user */
 
-  signIn(request: SignInRequest): Promise<User> | Observable<User> | User;
+  signIn(request: SignInRequest): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
   /** rpc to verify email */
 
-  verifyEmail(request: Token): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+  verifyEmail(request: Token): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
   /** rpc to resend confirmation email */
 
