@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { PasswordHashService } from 'src/password-hash/password-hash.service';
+import { HashService } from 'src/hash/hash.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppError } from 'src/utils/errors/app-error';
 
@@ -11,7 +11,7 @@ import type { CreateUserRequest, PasswordRequest, StatusResponse, UpdateUserRequ
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly passwordHashService: PasswordHashService,
+    private readonly hashService: HashService,
   ) {}
   protected readonly logger = new Logger(UserService.name);
 
@@ -132,7 +132,7 @@ export class UserService {
         throw AppError.notFound('User not found');
       }
 
-      const isMatch = await this.passwordHashService.compare(data.password, user.passwordHash);
+      const isMatch = await this.hashService.compare(data.password, user.passwordHash);
       if (!isMatch) {
         this.logger.warn(`Password mismatch for user ID: ${data.id}`);
         throw AppError.badRequest('Invalid password');
@@ -158,7 +158,7 @@ export class UserService {
         throw AppError.notFound('User not found');
       }
 
-      const newPasswordHash = await this.passwordHashService.create(data.password);
+      const newPasswordHash = await this.hashService.create(data.password);
       await this.prisma.user.update({
         where: { id: data.id },
         data: { passwordHash: newPasswordHash },

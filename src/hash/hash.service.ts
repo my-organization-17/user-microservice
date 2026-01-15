@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
 import { AppError } from 'src/utils/errors/app-error';
 
 @Injectable()
-export class PasswordHashService {
+export class HashService {
   private readonly index = 5;
+  protected readonly logger = new Logger(HashService.name);
 
   async create(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(this.index);
     const passwordHash = await bcrypt.hash(password, salt);
     if (!passwordHash) {
+      this.logger.error('Failed to create password hash');
       throw AppError.forbidden("Can't create password hash");
     }
     return passwordHash;
@@ -19,8 +21,18 @@ export class PasswordHashService {
   async compare(password: string, passwordHash: string): Promise<boolean> {
     const isValidPass = await bcrypt.compare(password, passwordHash);
     if (!isValidPass) {
+      this.logger.warn('Password does not match');
       throw AppError.badRequest('Password not match');
     }
     return isValidPass;
+  }
+
+  async validate(token: string, hash: string): Promise<boolean> {
+    const isValid = await bcrypt.compare(token, hash);
+    if (!isValid) {
+      this.logger.warn('Invalid token');
+      throw AppError.unauthorized('Invalid token');
+    }
+    return isValid;
   }
 }

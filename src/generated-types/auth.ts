@@ -32,6 +32,12 @@ export interface AuthResponse {
   user: User | null;
 }
 
+/** Message for refresh tokens response */
+export interface RefreshTokensResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
 /** Message representing a token */
 export interface Token {
   token: string;
@@ -59,6 +65,10 @@ export interface AuthServiceClient {
   /** rpc to verify email */
 
   verifyEmail(request: Token): Observable<AuthResponse>;
+
+  /** rpc to refresh tokens */
+
+  refreshTokens(request: Token): Observable<RefreshTokensResponse>;
 
   /** rpc to resend confirmation email */
 
@@ -88,6 +98,12 @@ export interface AuthServiceController {
 
   verifyEmail(request: Token): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
+  /** rpc to refresh tokens */
+
+  refreshTokens(
+    request: Token,
+  ): Promise<RefreshTokensResponse> | Observable<RefreshTokensResponse> | RefreshTokensResponse;
+
   /** rpc to resend confirmation email */
 
   resendEmail(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
@@ -103,7 +119,15 @@ export interface AuthServiceController {
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signUp", "signIn", "verifyEmail", "resendEmail", "resetPassword", "setNewPassword"];
+    const grpcMethods: string[] = [
+      "signUp",
+      "signIn",
+      "verifyEmail",
+      "refreshTokens",
+      "resendEmail",
+      "resetPassword",
+      "setNewPassword",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

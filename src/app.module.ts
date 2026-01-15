@@ -7,7 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { HealthCheckModule } from './health-check/health-check.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { PasswordHashModule } from './password-hash/password-hash.module';
+import { HashModule } from './hash/hash.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { PasswordHashModule } from './password-hash/password-hash.module';
     HealthCheckModule,
     UserModule,
     AuthModule,
-    PasswordHashModule,
+    HashModule,
   ],
   controllers: [],
   providers: [],

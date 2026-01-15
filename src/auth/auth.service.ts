@@ -3,18 +3,18 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
-import { PasswordHashService } from 'src/password-hash/password-hash.service';
+import { HashService } from 'src/hash/hash.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppError } from 'src/utils/errors/app-error';
 
 import type { User } from 'prisma/generated-types/client';
-import type { AuthResponse, SignUpRequest } from 'src/generated-types/auth';
+import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly passwordHashService: PasswordHashService,
+    private readonly hashService: HashService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -22,6 +22,25 @@ export class AuthService {
 
   private generateCryptoToken(): string {
     return crypto.randomBytes(32).toString('hex');
+  }
+
+  private async generateJwtTokens(userId: string, isBanned: boolean): Promise<[string, string]> {
+    return Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId, isBanned },
+        {
+          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+          expiresIn: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
+        },
+      ),
+      this.jwtService.signAsync(
+        { sub: userId, isBanned },
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          expiresIn: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
+        },
+      ),
+    ]);
   }
 
   async signUp(data: SignUpRequest): Promise<User> {
@@ -69,7 +88,7 @@ export class AuthService {
         );
       }
 
-      const passwordHash = await this.passwordHashService.create(data.password);
+      const passwordHash = await this.hashService.create(data.password);
 
       // Create new user
       const newUser = await this.prisma.user.create({
@@ -128,28 +147,16 @@ export class AuthService {
       });
 
       // Generate JWT tokens
-      const [accessToken, refreshToken] = await Promise.all([
-        this.jwtService.signAsync(
-          { sub: emailVerification.userId, isBanned: emailVerification.user.isBanned },
-          {
-            secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-            expiresIn: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
-          },
-        ),
-        this.jwtService.signAsync(
-          { sub: emailVerification.userId, isBanned: emailVerification.user.isBanned },
-          {
-            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
-          },
-        ),
-      ]);
+      const [accessToken, refreshToken] = await this.generateJwtTokens(
+        emailVerification.userId,
+        emailVerification.user.isBanned,
+      );
 
       // Update user record with hashed refresh token and set email as verified
       const updatedUser = await this.prisma.user.update({
         where: { id: emailVerification.userId },
         data: {
-          refreshTokenHash: await this.passwordHashService.create(refreshToken),
+          refreshTokenHash: await this.hashService.create(refreshToken),
           isEmailVerified: true,
         },
       });
@@ -164,6 +171,92 @@ export class AuthService {
       this.logger.error(`Error during email verification: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to verify email');
+    }
+  }
+
+  async signIn(data: SignInRequest): Promise<AuthResponse> {
+    this.logger.log(`Signing in user with email: ${data.email}`);
+    try {
+      // Find the user by email
+      const user = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+      if (!user) {
+        this.logger.warn(`User not found with email: ${data.email}`);
+        throw AppError.unauthorized('Invalid email or password');
+      }
+
+      // Verify password
+      await this.hashService.compare(data.password, user.passwordHash);
+
+      // Generate JWT tokens
+      const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
+
+      // Update user record with hashed refresh token
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          refreshTokenHash: await this.hashService.create(refreshToken),
+        },
+      });
+
+      this.logger.log(`User signed in with ID: ${user.id}`);
+      return {
+        accessToken,
+        refreshToken,
+        user,
+      };
+    } catch (error) {
+      this.logger.error(`Error during sign in: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to sign in');
+    }
+  }
+
+  async refreshTokens(token: string): Promise<RefreshTokensResponse> {
+    this.logger.log(`Refreshing token`);
+    try {
+      // Verify the provided token
+      const payload = await this.jwtService.verifyAsync<{ sub: string; isBanned: boolean }>(token, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+      if (!payload || !payload.sub) {
+        this.logger.warn(`Invalid refresh token`);
+        throw AppError.unauthorized('Invalid refresh token');
+      }
+
+      // Find the user
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!user || !user.refreshTokenHash) {
+        this.logger.warn(`Invalid refresh token for user ID: ${payload.sub}`);
+        throw AppError.unauthorized('Invalid refresh token');
+      }
+
+      // Verify the refresh token hash
+      await this.hashService.validate(token, user.refreshTokenHash);
+
+      // Generate new JWT tokens
+      const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
+
+      // Update user record with new hashed refresh token
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          refreshTokenHash: await this.hashService.create(refreshToken),
+        },
+      });
+
+      this.logger.log(`Tokens refreshed for user ID: ${user.id}`);
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      this.logger.error(`Error during token refresh: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to refresh token');
     }
   }
 }

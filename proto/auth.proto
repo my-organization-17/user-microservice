@@ -12,6 +12,8 @@ service AuthService {
   rpc SignIn(SignInRequest) returns (AuthResponse) {}
   // rpc to verify email
   rpc VerifyEmail(Token) returns (AuthResponse) {}
+  // rpc to refresh tokens
+  rpc RefreshTokens(Token) returns (RefreshTokensResponse) {}
   // rpc to resend confirmation email
   rpc ResendEmail(user.v1.Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
@@ -39,6 +41,12 @@ message AuthResponse {
   string access_token = 1;
   string refresh_token = 2;
   user.v1.User user = 3;
+}
+
+// Message for refresh tokens response
+message RefreshTokensResponse {
+  string access_token = 1;
+  string refresh_token = 2;
 }
 
 // Message representing a token
