@@ -5,10 +5,11 @@ import { UserService } from 'src/user/user.service';
 import { HashService } from 'src/hash/hash.service';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { AuthRepository } from './auth.repository';
 
 @Module({
   imports: [JwtModule.register({})],
   controllers: [AuthController],
-  providers: [AuthService, UserService, HashService],
+  providers: [AuthService, UserService, HashService, AuthRepository],
 })
 export class AuthModule {}

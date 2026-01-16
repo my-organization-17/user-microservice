@@ -4,8 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 import { HashService } from 'src/hash/hash.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AppError } from 'src/utils/errors/app-error';
+import { AuthRepository } from './auth.repository';
 
 import type { User } from 'prisma/generated-types/client';
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
@@ -13,10 +13,10 @@ import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly hashService: HashService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly authRepository: AuthRepository,
   ) {}
   protected readonly logger = new Logger(AuthService.name);
 
@@ -47,37 +47,29 @@ export class AuthService {
     this.logger.log(`Signing up user with email: ${data.email}`);
     try {
       // Check if user with the email already exists
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
+      const existingUser = await this.authRepository.findUserByEmail(data.email);
       if (existingUser?.isEmailVerified) {
         this.logger.warn(`Email is already in use: ${data.email}`);
         throw AppError.conflict('Email is already in use');
       }
       if (existingUser) {
-        const emailVerification = await this.prisma.emailVerificationToken.findUnique({
-          where: { userId: existingUser.id },
-        });
+        const emailVerification = await this.authRepository.findEmailVerificationTokenByUserId(existingUser.id);
         if (!emailVerification) {
           const token = this.generateCryptoToken();
-          await this.prisma.emailVerificationToken.create({
-            data: {
-              userId: existingUser.id,
-              token,
-              expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
-            },
+          await this.authRepository.createEmailVerificationToken({
+            userId: existingUser.id,
+            token,
+            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
           this.logger.log(`Resent email verification token for user ID: ${existingUser.id}`);
           throw AppError.conflict('Email is already in use but not verified. Verification email resent.');
         }
         if (emailVerification.expiresAt <= new Date()) {
           const token = this.generateCryptoToken();
-          await this.prisma.emailVerificationToken.update({
-            where: { userId: existingUser.id },
-            data: {
-              token,
-              expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
-            },
+          await this.authRepository.updateEmailVerificationToken({
+            userId: existingUser.id,
+            token,
+            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
           this.logger.log(`Resent expired email verification token for user ID: ${existingUser.id}`);
           throw AppError.conflict('Email is already in use but not verified. Verification email resent.');
@@ -88,17 +80,9 @@ export class AuthService {
         );
       }
 
-      const passwordHash = await this.hashService.create(data.password);
-
       // Create new user
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: data.email,
-          passwordHash,
-          name: data.name,
-          phoneNumber: data.phoneNumber,
-        },
-      });
+      const passwordHash = await this.hashService.create(data.password);
+      const newUser = await this.authRepository.createUser({ data, passwordHash });
       if (!newUser) {
         this.logger.error(`Failed to create user with email: ${data.email}`);
         throw AppError.internalServerError('Failed to create user');
@@ -106,12 +90,10 @@ export class AuthService {
 
       // Create email verification token
       const token = this.generateCryptoToken();
-      await this.prisma.emailVerificationToken.create({
-        data: {
-          userId: newUser.id,
-          token,
-          expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
-        },
+      await this.authRepository.createEmailVerificationToken({
+        userId: newUser.id,
+        token,
+        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
       });
 
       this.logger.log(`User created with ID: ${newUser.id}`);
@@ -127,10 +109,7 @@ export class AuthService {
     this.logger.log(`Verifying email with token: ${token}`);
     try {
       // Find the email verification record
-      const emailVerification = await this.prisma.emailVerificationToken.findUnique({
-        where: { token },
-        include: { user: true },
-      });
+      const emailVerification = await this.authRepository.findEmailVerificationTokenByToken(token);
       if (!emailVerification) {
         this.logger.warn(`Invalid email verification token: ${token}`);
         throw AppError.badRequest('Invalid or expired email verification token');
@@ -141,9 +120,10 @@ export class AuthService {
       }
 
       // Update the email verification record
-      await this.prisma.emailVerificationToken.update({
-        where: { token },
-        data: { verifiedAt: new Date(), token: '' }, // Invalidate the token
+      await this.authRepository.updateEmailVerificationToken({
+        userId: emailVerification.userId,
+        token: '',
+        expiresAt: new Date(),
       });
 
       // Generate JWT tokens
@@ -153,8 +133,8 @@ export class AuthService {
       );
 
       // Update user record with hashed refresh token and set email as verified
-      const updatedUser = await this.prisma.user.update({
-        where: { id: emailVerification.userId },
+      const updatedUser = await this.authRepository.updateUser({
+        id: emailVerification.userId,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
           isEmailVerified: true,
@@ -178,9 +158,7 @@ export class AuthService {
     this.logger.log(`Signing in user with email: ${data.email}`);
     try {
       // Find the user by email
-      const user = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
+      const user = await this.authRepository.findUserByEmail(data.email);
       if (!user) {
         this.logger.warn(`User not found with email: ${data.email}`);
         throw AppError.unauthorized('Invalid email or password');
@@ -193,8 +171,8 @@ export class AuthService {
       const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
 
       // Update user record with hashed refresh token
-      await this.prisma.user.update({
-        where: { id: user.id },
+      await this.authRepository.updateUser({
+        id: user.id,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
         },
@@ -226,9 +204,7 @@ export class AuthService {
       }
 
       // Find the user
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-      });
+      const user = await this.authRepository.findUserById(payload.sub);
       if (!user || !user.refreshTokenHash) {
         this.logger.warn(`Invalid refresh token for user ID: ${payload.sub}`);
         throw AppError.unauthorized('Invalid refresh token');
@@ -241,8 +217,8 @@ export class AuthService {
       const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
 
       // Update user record with new hashed refresh token
-      await this.prisma.user.update({
-        where: { id: user.id },
+      await this.authRepository.updateUser({
+        id: user.id,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
         },
