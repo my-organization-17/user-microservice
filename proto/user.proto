@@ -32,7 +32,7 @@ message User {
   optional string name = 2;
   string email = 3;
   optional string phone_number = 4;
-  string role = 5;
+  UserRole role = 5;
   optional string avatar_url = 6;
   string password_hash = 7;
   bool is_email_verified = 8;
@@ -43,6 +43,14 @@ message User {
   optional string refresh_token_hash = 13;
   google.protobuf.Timestamp created_at = 14;
   google.protobuf.Timestamp updated_at = 15;
+}
+
+// user roles enumeration
+enum UserRole {
+  USER = 0;
+  ADMIN = 1;
+  MODERATOR = 2;
+  VISITOR = 3;
 }
 
 // declaration of Id message

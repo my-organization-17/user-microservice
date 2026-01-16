@@ -4,8 +4,15 @@ import { HashService } from 'src/hash/hash.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AppError } from 'src/utils/errors/app-error';
 
-import type { User } from 'prisma/generated-types/client';
-import type { CreateUserRequest, PasswordRequest, StatusResponse, UpdateUserRequest } from 'src/generated-types/user';
+import {
+  UserRole,
+  type CreateUserRequest,
+  type PasswordRequest,
+  type StatusResponse,
+  type UpdateUserRequest,
+  type User,
+} from 'src/generated-types/user';
+import { convertEnum } from 'src/utils/convertEnum';
 
 @Injectable()
 export class UserService {
@@ -25,7 +32,10 @@ export class UserService {
         this.logger.warn(`User not found with ID: ${id}`);
         throw AppError.notFound('User not found');
       }
-      return user;
+      return {
+        ...user,
+        role: convertEnum(UserRole, user.role),
+      };
     } catch (error) {
       this.logger.error(`Error fetching user: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
@@ -43,7 +53,10 @@ export class UserService {
         this.logger.warn(`User not found with email: ${email}`);
         throw AppError.notFound('User not found');
       }
-      return user;
+      return {
+        ...user,
+        role: convertEnum(UserRole, user.role),
+      };
     } catch (error) {
       this.logger.error(`Error fetching user: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
@@ -66,7 +79,10 @@ export class UserService {
         data,
       });
       this.logger.log(`User created with ID: ${newUser.id}`);
-      return newUser;
+      return {
+        ...newUser,
+        role: convertEnum(UserRole, newUser.role),
+      };
     } catch (error) {
       this.logger.error(`Error creating user: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
@@ -90,7 +106,10 @@ export class UserService {
         data,
       });
       this.logger.log(`User updated with ID: ${data.id}`);
-      return updatedUser;
+      return {
+        ...updatedUser,
+        role: convertEnum(UserRole, updatedUser.role),
+      };
     } catch (error) {
       this.logger.error(`Error updating user: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;

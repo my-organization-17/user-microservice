@@ -7,8 +7,9 @@ import { HashService } from 'src/hash/hash.service';
 import { AppError } from 'src/utils/errors/app-error';
 import { AuthRepository } from './auth.repository';
 
-import type { User } from 'prisma/generated-types/client';
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
+import { UserRole, type User } from 'src/generated-types/user';
+import { convertEnum } from 'src/utils/convertEnum';
 
 @Injectable()
 export class AuthService {
@@ -24,17 +25,17 @@ export class AuthService {
     return crypto.randomBytes(32).toString('hex');
   }
 
-  private async generateJwtTokens(userId: string, isBanned: boolean): Promise<[string, string]> {
+  private async generateJwtTokens(userId: string, isBanned: boolean, role: UserRole): Promise<[string, string]> {
     return Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, isBanned },
+        { sub: userId, isBanned, role },
         {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
           expiresIn: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
         },
       ),
       this.jwtService.signAsync(
-        { sub: userId, isBanned },
+        { sub: userId, isBanned, role },
         {
           secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
@@ -97,7 +98,10 @@ export class AuthService {
       });
 
       this.logger.log(`User created with ID: ${newUser.id}`);
-      return newUser;
+      return {
+        ...newUser,
+        role: convertEnum(UserRole, newUser.role),
+      };
     } catch (error) {
       this.logger.error(`Error during sign up: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
@@ -130,6 +134,7 @@ export class AuthService {
       const [accessToken, refreshToken] = await this.generateJwtTokens(
         emailVerification.userId,
         emailVerification.user.isBanned,
+        convertEnum(UserRole, emailVerification.user.role),
       );
 
       // Update user record with hashed refresh token and set email as verified
@@ -145,7 +150,10 @@ export class AuthService {
       return {
         accessToken,
         refreshToken,
-        user: updatedUser,
+        user: {
+          ...updatedUser,
+          role: convertEnum(UserRole, updatedUser.role),
+        },
       };
     } catch (error) {
       this.logger.error(`Error during email verification: ${error instanceof Error ? error.message : error}`);
@@ -168,7 +176,11 @@ export class AuthService {
       await this.hashService.compare(data.password, user.passwordHash);
 
       // Generate JWT tokens
-      const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
+      const [accessToken, refreshToken] = await this.generateJwtTokens(
+        user.id,
+        user.isBanned,
+        convertEnum(UserRole, user.role),
+      );
 
       // Update user record with hashed refresh token
       await this.authRepository.updateUser({
@@ -182,7 +194,10 @@ export class AuthService {
       return {
         accessToken,
         refreshToken,
-        user,
+        user: {
+          ...user,
+          role: convertEnum(UserRole, user.role),
+        },
       };
     } catch (error) {
       this.logger.error(`Error during sign in: ${error instanceof Error ? error.message : error}`);
@@ -214,7 +229,11 @@ export class AuthService {
       await this.hashService.validate(token, user.refreshTokenHash);
 
       // Generate new JWT tokens
-      const [accessToken, refreshToken] = await this.generateJwtTokens(user.id, user.isBanned);
+      const [accessToken, refreshToken] = await this.generateJwtTokens(
+        user.id,
+        user.isBanned,
+        convertEnum(UserRole, user.role),
+      );
 
       // Update user record with new hashed refresh token
       await this.authRepository.updateUser({

@@ -11,13 +11,22 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "user.v1";
 
+/** user roles enumeration */
+export enum UserRole {
+  USER = 0,
+  ADMIN = 1,
+  MODERATOR = 2,
+  VISITOR = 3,
+  UNRECOGNIZED = -1,
+}
+
 /** declaration of User message */
 export interface User {
   id: string;
   name?: string | null | undefined;
   email: string;
   phoneNumber?: string | null | undefined;
-  role: string;
+  role: UserRole;
   avatarUrl?: string | null | undefined;
   passwordHash: string;
   isEmailVerified: boolean;
