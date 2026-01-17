@@ -14,7 +14,7 @@ export class HealthCheckController {
     this.logger.log('Health check requested');
     return {
       serving: true,
-      message: 'Menu microservice is healthy',
+      message: 'User microservice is healthy',
     };
   }
 

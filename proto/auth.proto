@@ -15,9 +15,9 @@ service AuthService {
   // rpc to refresh tokens
   rpc RefreshTokens(Token) returns (RefreshTokensResponse) {}
   // rpc to resend confirmation email
-  rpc ResendEmail(user.v1.Email) returns (user.v1.StatusResponse) {}
+  rpc ResendEmail(Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
-  rpc ResetPassword(user.v1.Email) returns (user.v1.StatusResponse) {}
+  rpc ResetPassword(Email) returns (user.v1.StatusResponse) {}
   // rpc to set new password
   rpc SetNewPassword(SetNewPasswordRequest) returns (user.v1.StatusResponse) {}
 }
@@ -52,6 +52,11 @@ message RefreshTokensResponse {
 // Message representing a token
 message Token {
   string token = 1;
+}
+
+// Message representing an email
+message Email {
+  string email = 1;
 }
 
 // Message for setting a new password

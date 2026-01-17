@@ -3,9 +3,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HashService } from 'src/hash/hash.service';
 import { AppError } from 'src/utils/errors/app-error';
 import { convertEnum } from 'src/utils/convertEnum';
+import type { UserRole as PrismaUserRole } from 'prisma/generated-types/enums';
 
 import {
   UserRole,
+  type BanUserRequest,
   type PasswordRequest,
   type StatusResponse,
   type UpdateUserRequest,
@@ -27,25 +29,6 @@ export class UserService {
       const user = await this.userRepository.findUserById(id);
       if (!user) {
         this.logger.warn(`User not found with ID: ${id}`);
-        throw AppError.notFound('User not found');
-      }
-      return {
-        ...user,
-        role: convertEnum(UserRole, user.role),
-      };
-    } catch (error) {
-      this.logger.error(`Error fetching user: ${error instanceof Error ? error.message : error}`);
-      if (error instanceof AppError) throw error;
-      throw AppError.internalServerError('Failed to fetch user');
-    }
-  }
-
-  async getUserByEmail(email: string): Promise<User> {
-    this.logger.log(`Fetching user by email: ${email}`);
-    try {
-      const user = await this.userRepository.findUserByEmail(email);
-      if (!user) {
-        this.logger.warn(`User not found with email: ${email}`);
         throw AppError.notFound('User not found');
       }
       return {
@@ -132,6 +115,7 @@ export class UserService {
         this.logger.warn(`User not found with ID: ${data.id}`);
         throw AppError.notFound('User not found');
       }
+      await this.hashService.same(data.password, user.passwordHash);
 
       const newPasswordHash = await this.hashService.create(data.password);
       await this.userRepository.updateUser({ id: data.id, data: { passwordHash: newPasswordHash } });
@@ -142,6 +126,89 @@ export class UserService {
       this.logger.error(`Error changing password: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to change password');
+    }
+  }
+
+  async banUser(data: BanUserRequest): Promise<User> {
+    this.logger.log(`Banning user with ID: ${data.id}`);
+    try {
+      const user = await this.userRepository.findUserById(data.id);
+      if (!user) {
+        this.logger.warn(`User not found with ID: ${data.id}`);
+        throw AppError.notFound('User not found');
+      }
+      if (user.isBanned) {
+        this.logger.warn(`User already banned with ID: ${data.id}`);
+        throw AppError.badRequest('User is already banned');
+      }
+
+      const bannedUser = await this.userRepository.updateUser({
+        id: data.id,
+        data: { isBanned: true, banReason: data.reason, bannedAt: new Date() },
+      });
+      this.logger.log(`User banned with ID: ${data.id}`);
+      return {
+        ...bannedUser,
+        role: convertEnum(UserRole, bannedUser.role),
+      };
+    } catch (error) {
+      this.logger.error(`Error banning user: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to ban user');
+    }
+  }
+
+  async unbanUser(id: string): Promise<User> {
+    this.logger.log(`Unbanning user with ID: ${id}`);
+    try {
+      const user = await this.userRepository.findUserById(id);
+      if (!user) {
+        this.logger.warn(`User not found with ID: ${id}`);
+        throw AppError.notFound('User not found');
+      }
+      if (!user.isBanned) {
+        this.logger.warn(`User is not banned with ID: ${id}`);
+        throw AppError.badRequest('User is not banned');
+      }
+
+      const unbannedUser = await this.userRepository.updateUser({
+        id,
+        data: { isBanned: false, banReason: null, bannedAt: null },
+      });
+      this.logger.log(`User unbanned with ID: ${id}`);
+      return {
+        ...unbannedUser,
+        role: convertEnum(UserRole, unbannedUser.role),
+      };
+    } catch (error) {
+      this.logger.error(`Error unbanning user: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to unban user');
+    }
+  }
+
+  async changeUserRole(data: { id: string; role: UserRole }): Promise<User> {
+    this.logger.log(`Changing role for user ID: ${data.id} to ${UserRole[data.role]}`);
+    try {
+      const user = await this.userRepository.findUserById(data.id);
+      if (!user) {
+        this.logger.warn(`User not found with ID: ${data.id}`);
+        throw AppError.notFound('User not found');
+      }
+
+      const updatedUser = await this.userRepository.updateUser({
+        id: data.id,
+        data: { role: UserRole[data.role] as PrismaUserRole },
+      });
+      this.logger.log(`User role changed for ID: ${data.id} to ${UserRole[data.role]}`);
+      return {
+        ...updatedUser,
+        role: convertEnum(UserRole, updatedUser.role),
+      };
+    } catch (error) {
+      this.logger.error(`Error changing user role: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to change user role');
     }
   }
 }

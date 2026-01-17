@@ -6,24 +6,22 @@ import "google/protobuf/timestamp.proto";
 
 // UserService defines the gRPC service for managing users.
 service UserService {
-  // rpc to get user by email
-  rpc GetUserByEmail(Email) returns (User) {}
   // rpc to get user by id
   rpc GetUserById(Id) returns (User) {}
-  // rpc to create a new user
-  rpc CreateUser(CreateUserRequest) returns (User) {}
   // rpc to update an existing user
   rpc UpdateUser(UpdateUserRequest) returns (User) {}
   // rpc to delete a user by id
   rpc DeleteUser(Id) returns (StatusResponse) {}
-  // rpc to ban a user by id
-  rpc BanUser(BanUserRequest) returns (User) {}
-  // rpc to unban a user by id
-  rpc UnbanUser(Id) returns (User) {}
   // rpc to confirm user password
   rpc ConfirmPassword(PasswordRequest) returns (StatusResponse) {}
   // rpc to change user password
   rpc ChangePassword(PasswordRequest) returns (StatusResponse) {}
+  // rpc to ban a user by id
+  rpc BanUser(BanUserRequest) returns (User) {}
+  // rpc to unban a user by id
+  rpc UnbanUser(Id) returns (User) {}
+  // rpc to change user role
+  rpc ChangeUserRole(UserRoleRequest) returns (User) {}
 }
 
 // declaration of User message
@@ -57,23 +55,10 @@ enum UserRole {
 message Id {
   string id = 1;
 }
-// declaration of Email message
-message Email {
-  string email = 1;
-}
 // Message representing a status response
 message StatusResponse {
   bool success = 1;
   string message = 2;
-}
-
-// Message for creating a new user
-message CreateUserRequest {
-  string email = 1;
-  string password_hash = 2;
-  optional string name = 3;
-  optional string phone_number = 4;
-  optional string avatar_url = 5;
 }
 
 // Message for updating an existing user
@@ -94,6 +79,12 @@ message BanUserRequest {
 message PasswordRequest {
   string id = 1;
   string password = 2;
+}
+
+// Message for changing user role
+message UserRoleRequest {
+  string id = 1;
+  UserRole role = 2;
 }
 
 // Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps

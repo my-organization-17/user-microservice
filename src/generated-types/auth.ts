@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Email, StatusResponse, User } from "./user";
+import { StatusResponse, User } from "./user";
 
 export const protobufPackage = "auth.v1";
 
@@ -41,6 +41,11 @@ export interface RefreshTokensResponse {
 /** Message representing a token */
 export interface Token {
   token: string;
+}
+
+/** Message representing an email */
+export interface Email {
+  email: string;
 }
 
 /** Message for setting a new password */

@@ -44,24 +44,10 @@ export interface Id {
   id: string;
 }
 
-/** declaration of Email message */
-export interface Email {
-  email: string;
-}
-
 /** Message representing a status response */
 export interface StatusResponse {
   success: boolean;
   message: string;
-}
-
-/** Message for creating a new user */
-export interface CreateUserRequest {
-  email: string;
-  passwordHash: string;
-  name?: string | null | undefined;
-  phoneNumber?: string | null | undefined;
-  avatarUrl?: string | null | undefined;
 }
 
 /** Message for updating an existing user */
@@ -84,6 +70,12 @@ export interface PasswordRequest {
   password: string;
 }
 
+/** Message for changing user role */
+export interface UserRoleRequest {
+  id: string;
+  role: UserRole;
+}
+
 export const USER_V1_PACKAGE_NAME = "user.v1";
 
 wrappers[".google.protobuf.Timestamp"] = {
@@ -98,17 +90,9 @@ wrappers[".google.protobuf.Timestamp"] = {
 /** UserService defines the gRPC service for managing users. */
 
 export interface UserServiceClient {
-  /** rpc to get user by email */
-
-  getUserByEmail(request: Email): Observable<User>;
-
   /** rpc to get user by id */
 
   getUserById(request: Id): Observable<User>;
-
-  /** rpc to create a new user */
-
-  createUser(request: CreateUserRequest): Observable<User>;
 
   /** rpc to update an existing user */
 
@@ -118,6 +102,14 @@ export interface UserServiceClient {
 
   deleteUser(request: Id): Observable<StatusResponse>;
 
+  /** rpc to confirm user password */
+
+  confirmPassword(request: PasswordRequest): Observable<StatusResponse>;
+
+  /** rpc to change user password */
+
+  changePassword(request: PasswordRequest): Observable<StatusResponse>;
+
   /** rpc to ban a user by id */
 
   banUser(request: BanUserRequest): Observable<User>;
@@ -126,29 +118,17 @@ export interface UserServiceClient {
 
   unbanUser(request: Id): Observable<User>;
 
-  /** rpc to confirm user password */
+  /** rpc to change user role */
 
-  confirmPassword(request: PasswordRequest): Observable<StatusResponse>;
-
-  /** rpc to change user password */
-
-  changePassword(request: PasswordRequest): Observable<StatusResponse>;
+  changeUserRole(request: UserRoleRequest): Observable<User>;
 }
 
 /** UserService defines the gRPC service for managing users. */
 
 export interface UserServiceController {
-  /** rpc to get user by email */
-
-  getUserByEmail(request: Email): Promise<User> | Observable<User> | User;
-
   /** rpc to get user by id */
 
   getUserById(request: Id): Promise<User> | Observable<User> | User;
-
-  /** rpc to create a new user */
-
-  createUser(request: CreateUserRequest): Promise<User> | Observable<User> | User;
 
   /** rpc to update an existing user */
 
@@ -158,6 +138,14 @@ export interface UserServiceController {
 
   deleteUser(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 
+  /** rpc to confirm user password */
+
+  confirmPassword(request: PasswordRequest): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to change user password */
+
+  changePassword(request: PasswordRequest): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
   /** rpc to ban a user by id */
 
   banUser(request: BanUserRequest): Promise<User> | Observable<User> | User;
@@ -166,27 +154,22 @@ export interface UserServiceController {
 
   unbanUser(request: Id): Promise<User> | Observable<User> | User;
 
-  /** rpc to confirm user password */
+  /** rpc to change user role */
 
-  confirmPassword(request: PasswordRequest): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
-
-  /** rpc to change user password */
-
-  changePassword(request: PasswordRequest): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+  changeUserRole(request: UserRoleRequest): Promise<User> | Observable<User> | User;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      "getUserByEmail",
       "getUserById",
-      "createUser",
       "updateUser",
       "deleteUser",
-      "banUser",
-      "unbanUser",
       "confirmPassword",
       "changePassword",
+      "banUser",
+      "unbanUser",
+      "changeUserRole",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

@@ -27,6 +27,15 @@ export class HashService {
     return isValidPass;
   }
 
+  async same(password: string, passwordHash: string): Promise<boolean> {
+    const isSame = await bcrypt.compare(password, passwordHash);
+    if (isSame) {
+      this.logger.warn('New password must be different from the old one');
+      throw AppError.badRequest('New password must be different from the old one');
+    }
+    return isSame;
+  }
+
   async validate(token: string, hash: string): Promise<boolean> {
     const isValid = await bcrypt.compare(token, hash);
     if (!isValid) {
