@@ -4,12 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 import { HashService } from 'src/hash/hash.service';
+import { UserRepository } from 'src/user/user.repository';
 import { AppError } from 'src/utils/errors/app-error';
+import { convertEnum } from 'src/utils/convertEnum';
 import { AuthRepository } from './auth.repository';
 
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
 import { UserRole, type User } from 'src/generated-types/user';
-import { convertEnum } from 'src/utils/convertEnum';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly authRepository: AuthRepository,
+    private readonly userRepository: UserRepository,
   ) {}
   protected readonly logger = new Logger(AuthService.name);
 
@@ -48,7 +50,7 @@ export class AuthService {
     this.logger.log(`Signing up user with email: ${data.email}`);
     try {
       // Check if user with the email already exists
-      const existingUser = await this.authRepository.findUserByEmail(data.email);
+      const existingUser = await this.userRepository.findUserByEmail(data.email);
       if (existingUser?.isEmailVerified) {
         this.logger.warn(`Email is already in use: ${data.email}`);
         throw AppError.conflict('Email is already in use');
@@ -83,7 +85,7 @@ export class AuthService {
 
       // Create new user
       const passwordHash = await this.hashService.create(data.password);
-      const newUser = await this.authRepository.createUser({ data, passwordHash });
+      const newUser = await this.userRepository.createUser({ data, passwordHash });
       if (!newUser) {
         this.logger.error(`Failed to create user with email: ${data.email}`);
         throw AppError.internalServerError('Failed to create user');
@@ -138,7 +140,7 @@ export class AuthService {
       );
 
       // Update user record with hashed refresh token and set email as verified
-      const updatedUser = await this.authRepository.updateUser({
+      const updatedUser = await this.userRepository.updateUser({
         id: emailVerification.userId,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
@@ -166,7 +168,7 @@ export class AuthService {
     this.logger.log(`Signing in user with email: ${data.email}`);
     try {
       // Find the user by email
-      const user = await this.authRepository.findUserByEmail(data.email);
+      const user = await this.userRepository.findUserByEmail(data.email);
       if (!user) {
         this.logger.warn(`User not found with email: ${data.email}`);
         throw AppError.unauthorized('Invalid email or password');
@@ -183,7 +185,7 @@ export class AuthService {
       );
 
       // Update user record with hashed refresh token
-      await this.authRepository.updateUser({
+      await this.userRepository.updateUser({
         id: user.id,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
@@ -219,7 +221,7 @@ export class AuthService {
       }
 
       // Find the user
-      const user = await this.authRepository.findUserById(payload.sub);
+      const user = await this.userRepository.findUserById(payload.sub);
       if (!user || !user.refreshTokenHash) {
         this.logger.warn(`Invalid refresh token for user ID: ${payload.sub}`);
         throw AppError.unauthorized('Invalid refresh token');
@@ -236,7 +238,7 @@ export class AuthService {
       );
 
       // Update user record with new hashed refresh token
-      await this.authRepository.updateUser({
+      await this.userRepository.updateUser({
         id: user.id,
         data: {
           refreshTokenHash: await this.hashService.create(refreshToken),
