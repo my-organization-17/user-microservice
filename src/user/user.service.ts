@@ -9,6 +9,7 @@ import {
   UserRole,
   type BanDetailsResponse,
   type BanUserRequest,
+  type GetBannedUsersResponse,
   type PasswordRequest,
   type StatusResponse,
   type UpdateUserRequest,
@@ -204,14 +205,15 @@ export class UserService {
     }
   }
 
-  async getBannedUsers(): Promise<User[]> {
+  async getBannedUsers(): Promise<GetBannedUsersResponse> {
     this.logger.log('Getting all banned users');
     const bannedUsers = await this.userRepository.getBannedUsers();
 
-    return bannedUsers.map((user) => ({
+    const users = bannedUsers.map((user) => ({
       ...user,
       role: convertEnum(UserRole, user.role),
     }));
+    return { users };
   }
 
   async getBanDetailsByUserId(userId: string): Promise<BanDetailsResponse> {
