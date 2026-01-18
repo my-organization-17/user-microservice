@@ -36,8 +36,6 @@ export type UserMinAggregateOutputType = {
   isEmailVerified: boolean | null
   lastLoginAt: Date | null
   isBanned: boolean | null
-  banReason: string | null
-  bannedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,8 +52,6 @@ export type UserMaxAggregateOutputType = {
   isEmailVerified: boolean | null
   lastLoginAt: Date | null
   isBanned: boolean | null
-  banReason: string | null
-  bannedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,8 +68,6 @@ export type UserCountAggregateOutputType = {
   isEmailVerified: number
   lastLoginAt: number
   isBanned: number
-  banReason: number
-  bannedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -92,8 +86,6 @@ export type UserMinAggregateInputType = {
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
-  banReason?: true
-  bannedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,8 +102,6 @@ export type UserMaxAggregateInputType = {
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
-  banReason?: true
-  bannedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -128,8 +118,6 @@ export type UserCountAggregateInputType = {
   isEmailVerified?: true
   lastLoginAt?: true
   isBanned?: true
-  banReason?: true
-  bannedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -219,8 +207,6 @@ export type UserGroupByOutputType = {
   isEmailVerified: boolean
   lastLoginAt: Date | null
   isBanned: boolean
-  banReason: string | null
-  bannedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -258,12 +244,11 @@ export type UserWhereInput = {
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolFilter<"User"> | boolean
-  banReason?: Prisma.StringNullableFilter<"User"> | string | null
-  bannedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   emailVerificationTokens?: Prisma.XOR<Prisma.EmailVerificationTokenNullableScalarRelationFilter, Prisma.EmailVerificationTokenWhereInput> | null
+  banDetails?: Prisma.BanDetailsListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -278,12 +263,11 @@ export type UserOrderByWithRelationInput = {
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isBanned?: Prisma.SortOrder
-  banReason?: Prisma.SortOrderInput | Prisma.SortOrder
-  bannedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenOrderByWithRelationInput
+  banDetails?: Prisma.BanDetailsOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -301,12 +285,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   isEmailVerified?: Prisma.BoolFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolFilter<"User"> | boolean
-  banReason?: Prisma.StringNullableFilter<"User"> | string | null
-  bannedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   emailVerificationTokens?: Prisma.XOR<Prisma.EmailVerificationTokenNullableScalarRelationFilter, Prisma.EmailVerificationTokenWhereInput> | null
+  banDetails?: Prisma.BanDetailsListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -321,8 +304,6 @@ export type UserOrderByWithAggregationInput = {
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isBanned?: Prisma.SortOrder
-  banReason?: Prisma.SortOrderInput | Prisma.SortOrder
-  bannedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -345,8 +326,6 @@ export type UserScalarWhereWithAggregatesInput = {
   isEmailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   isBanned?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
-  banReason?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  bannedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -363,12 +342,11 @@ export type UserCreateInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedOneWithoutUserInput
+  banDetails?: Prisma.BanDetailsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -383,12 +361,11 @@ export type UserUncheckedCreateInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedOneWithoutUserInput
+  banDetails?: Prisma.BanDetailsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -403,12 +380,11 @@ export type UserUpdateInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateOneWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -423,12 +399,11 @@ export type UserUncheckedUpdateInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateOneWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -443,8 +418,6 @@ export type UserCreateManyInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -461,8 +434,6 @@ export type UserUpdateManyMutationInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -479,8 +450,6 @@ export type UserUncheckedUpdateManyInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -497,8 +466,6 @@ export type UserCountOrderByAggregateInput = {
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
-  banReason?: Prisma.SortOrder
-  bannedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -515,8 +482,6 @@ export type UserMaxOrderByAggregateInput = {
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
-  banReason?: Prisma.SortOrder
-  bannedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -533,8 +498,6 @@ export type UserMinOrderByAggregateInput = {
   isEmailVerified?: Prisma.SortOrder
   lastLoginAt?: Prisma.SortOrder
   isBanned?: Prisma.SortOrder
-  banReason?: Prisma.SortOrder
-  bannedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -596,6 +559,20 @@ export type UserUpdateOneRequiredWithoutEmailVerificationTokensNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailVerificationTokensInput, Prisma.UserUpdateWithoutEmailVerificationTokensInput>, Prisma.UserUncheckedUpdateWithoutEmailVerificationTokensInput>
 }
 
+export type UserCreateNestedOneWithoutBanDetailsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBanDetailsInput, Prisma.UserUncheckedCreateWithoutBanDetailsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBanDetailsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBanDetailsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBanDetailsInput, Prisma.UserUncheckedCreateWithoutBanDetailsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBanDetailsInput
+  upsert?: Prisma.UserUpsertWithoutBanDetailsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBanDetailsInput, Prisma.UserUpdateWithoutBanDetailsInput>, Prisma.UserUncheckedUpdateWithoutBanDetailsInput>
+}
+
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   name?: string | null
@@ -608,11 +585,10 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedOneWithoutUserInput
+  banDetails?: Prisma.BanDetailsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -627,11 +603,10 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedOneWithoutUserInput
+  banDetails?: Prisma.BanDetailsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -662,11 +637,10 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateOneWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -681,11 +655,10 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateOneWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationTokensInput = {
@@ -700,11 +673,10 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  banDetails?: Prisma.BanDetailsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -719,11 +691,10 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   isEmailVerified?: boolean
   lastLoginAt?: Date | string | null
   isBanned?: boolean
-  banReason?: string | null
-  bannedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  banDetails?: Prisma.BanDetailsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -754,11 +725,10 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -773,11 +743,98 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bannedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  banDetails?: Prisma.BanDetailsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutBanDetailsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  phoneNumber?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  passwordHash: string
+  refreshTokenHash?: string | null
+  isEmailVerified?: boolean
+  lastLoginAt?: Date | string | null
+  isBanned?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBanDetailsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  phoneNumber?: string | null
+  role?: $Enums.UserRole
+  avatarUrl?: string | null
+  passwordHash: string
+  refreshTokenHash?: string | null
+  isEmailVerified?: boolean
+  lastLoginAt?: Date | string | null
+  isBanned?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBanDetailsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBanDetailsInput, Prisma.UserUncheckedCreateWithoutBanDetailsInput>
+}
+
+export type UserUpsertWithoutBanDetailsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBanDetailsInput, Prisma.UserUncheckedUpdateWithoutBanDetailsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBanDetailsInput, Prisma.UserUncheckedCreateWithoutBanDetailsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBanDetailsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBanDetailsInput, Prisma.UserUncheckedUpdateWithoutBanDetailsInput>
+}
+
+export type UserUpdateWithoutBanDetailsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBanDetailsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEmailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isBanned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -787,10 +844,12 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
 
 export type UserCountOutputType = {
   passwordResetTokens: number
+  banDetails: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
+  banDetails?: boolean | UserCountOutputTypeCountBanDetailsArgs
 }
 
 /**
@@ -810,6 +869,13 @@ export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runt
   where?: Prisma.PasswordResetTokenWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBanDetailsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BanDetailsWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -823,12 +889,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
-  banReason?: boolean
-  bannedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  banDetails?: boolean | Prisma.User$banDetailsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -844,8 +909,6 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
-  banReason?: boolean
-  bannedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -862,8 +925,6 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
-  banReason?: boolean
-  bannedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -880,16 +941,15 @@ export type UserSelectScalar = {
   isEmailVerified?: boolean
   lastLoginAt?: boolean
   isBanned?: boolean
-  banReason?: boolean
-  bannedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phoneNumber" | "role" | "avatarUrl" | "passwordHash" | "refreshTokenHash" | "isEmailVerified" | "lastLoginAt" | "isBanned" | "banReason" | "bannedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "phoneNumber" | "role" | "avatarUrl" | "passwordHash" | "refreshTokenHash" | "isEmailVerified" | "lastLoginAt" | "isBanned" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
+  banDetails?: boolean | Prisma.User$banDetailsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -900,6 +960,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     emailVerificationTokens: Prisma.$EmailVerificationTokenPayload<ExtArgs> | null
+    banDetails: Prisma.$BanDetailsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -913,8 +974,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isEmailVerified: boolean
     lastLoginAt: Date | null
     isBanned: boolean
-    banReason: string | null
-    bannedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1313,6 +1372,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   emailVerificationTokens<T extends Prisma.User$emailVerificationTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailVerificationTokensArgs<ExtArgs>>): Prisma.Prisma__EmailVerificationTokenClient<runtime.Types.Result.GetResult<Prisma.$EmailVerificationTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  banDetails<T extends Prisma.User$banDetailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$banDetailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BanDetailsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1353,8 +1413,6 @@ export interface UserFieldRefs {
   readonly isEmailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly isBanned: Prisma.FieldRef<"User", 'Boolean'>
-  readonly banReason: Prisma.FieldRef<"User", 'String'>
-  readonly bannedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -1785,6 +1843,30 @@ export type User$emailVerificationTokensArgs<ExtArgs extends runtime.Types.Exten
    */
   include?: Prisma.EmailVerificationTokenInclude<ExtArgs> | null
   where?: Prisma.EmailVerificationTokenWhereInput
+}
+
+/**
+ * User.banDetails
+ */
+export type User$banDetailsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BanDetails
+   */
+  select?: Prisma.BanDetailsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BanDetails
+   */
+  omit?: Prisma.BanDetailsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BanDetailsInclude<ExtArgs> | null
+  where?: Prisma.BanDetailsWhereInput
+  orderBy?: Prisma.BanDetailsOrderByWithRelationInput | Prisma.BanDetailsOrderByWithRelationInput[]
+  cursor?: Prisma.BanDetailsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BanDetailsScalarFieldEnum | Prisma.BanDetailsScalarFieldEnum[]
 }
 
 /**

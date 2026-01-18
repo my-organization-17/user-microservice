@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   PasswordResetToken: 'PasswordResetToken',
-  EmailVerificationToken: 'EmailVerificationToken'
+  EmailVerificationToken: 'EmailVerificationToken',
+  BanDetails: 'BanDetails'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -84,8 +85,6 @@ export const UserScalarFieldEnum = {
   isEmailVerified: 'isEmailVerified',
   lastLoginAt: 'lastLoginAt',
   isBanned: 'isBanned',
-  banReason: 'banReason',
-  bannedAt: 'bannedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -115,6 +114,19 @@ export const EmailVerificationTokenScalarFieldEnum = {
 } as const
 
 export type EmailVerificationTokenScalarFieldEnum = (typeof EmailVerificationTokenScalarFieldEnum)[keyof typeof EmailVerificationTokenScalarFieldEnum]
+
+
+export const BanDetailsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  isBanned: 'isBanned',
+  bannedBy: 'bannedBy',
+  banReason: 'banReason',
+  banUntil: 'banUntil',
+  createdAt: 'createdAt'
+} as const
+
+export type BanDetailsScalarFieldEnum = (typeof BanDetailsScalarFieldEnum)[keyof typeof BanDetailsScalarFieldEnum]
 
 
 export const SortOrder = {

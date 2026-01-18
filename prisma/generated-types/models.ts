@@ -11,4 +11,5 @@
 export type * from './models/User'
 export type * from './models/PasswordResetToken'
 export type * from './models/EmailVerificationToken'
+export type * from './models/BanDetails'
 export type * from './commonInputTypes'

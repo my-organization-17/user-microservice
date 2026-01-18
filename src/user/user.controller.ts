@@ -52,9 +52,21 @@ export class UserController {
   }
 
   @GrpcMethod(USER_SERVICE_NAME, 'UnbanUser')
-  async unbanUser({ id }: { id: string }) {
-    this.logger.log(`Received UnbanUser request for id: ${id}`);
-    return this.userService.unbanUser(id);
+  async unbanUser(data: BanUserRequest) {
+    this.logger.log(`Received UnbanUser request for id: ${data.id}`);
+    return this.userService.unbanUser(data);
+  }
+
+  @GrpcMethod(USER_SERVICE_NAME, 'GetBannedUsers')
+  async getBannedUsers() {
+    this.logger.log('Received GetBannedUsers request');
+    return this.userService.getBannedUsers();
+  }
+
+  @GrpcMethod(USER_SERVICE_NAME, 'GetBanDetailsByUserId')
+  async getBanDetailsByUserId({ id }: { id: string }) {
+    this.logger.log(`Received GetBanDetailsByUserId request for id: ${id}`);
+    return this.userService.getBanDetailsByUserId(id);
   }
 
   @GrpcMethod(USER_SERVICE_NAME, 'ChangeUserRole')

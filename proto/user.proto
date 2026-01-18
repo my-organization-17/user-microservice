@@ -3,9 +3,11 @@ syntax = "proto3";
 package user.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 // UserService defines the gRPC service for managing users.
 service UserService {
+  // --- user access rpc methods ---
   // rpc to get user by id
   rpc GetUserById(Id) returns (User) {}
   // rpc to update an existing user
@@ -16,10 +18,16 @@ service UserService {
   rpc ConfirmPassword(PasswordRequest) returns (StatusResponse) {}
   // rpc to change user password
   rpc ChangePassword(PasswordRequest) returns (StatusResponse) {}
+
+  // --- admin access rpc methods ---
   // rpc to ban a user by id
   rpc BanUser(BanUserRequest) returns (User) {}
   // rpc to unban a user by id
-  rpc UnbanUser(Id) returns (User) {}
+  rpc UnbanUser(BanUserRequest) returns (User) {}
+  // rpc to get all banned users
+  rpc GetBannedUsers(google.protobuf.Empty) returns (GetBannedUsersResponse) {}
+  // get ban details by user id
+  rpc GetBanDetailsByUserId(Id) returns (BanDetailsResponse) {}
   // rpc to change user role
   rpc ChangeUserRole(UserRoleRequest) returns (User) {}
 }
@@ -36,11 +44,9 @@ message User {
   bool is_email_verified = 8;
   optional google.protobuf.Timestamp last_login = 9; 
   bool is_banned = 10;
-  optional string ban_reason = 11;
-  optional google.protobuf.Timestamp banned_at = 12;
-  optional string refresh_token_hash = 13;
-  google.protobuf.Timestamp created_at = 14;
-  google.protobuf.Timestamp updated_at = 15;
+  optional string refresh_token_hash = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
 }
 
 // user roles enumeration
@@ -72,7 +78,30 @@ message UpdateUserRequest {
 // Message for banning a user
 message BanUserRequest {
   string id = 1;
-  optional string reason = 2;
+  string banned_by = 2;
+  optional string reason = 3;
+  optional google.protobuf.Timestamp ban_until = 4;
+}
+
+// Message for ban details
+message BanDetails {
+  string id = 1;
+  string user_id = 2;
+  bool is_banned = 3;
+  string banned_by = 4;
+  optional string ban_reason = 5;
+  optional google.protobuf.Timestamp ban_until = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// Message for ban details response
+message BanDetailsResponse {
+  repeated BanDetails ban_details = 1;
+}
+
+// Message for getting banned users response
+message GetBannedUsersResponse {
+  repeated User users = 1;
 }
 
 // Message for password related requests

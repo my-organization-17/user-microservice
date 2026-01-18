@@ -8,6 +8,7 @@
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { wrappers } from "protobufjs";
 import { Observable } from "rxjs";
+import { Empty } from "./google/protobuf/empty";
 
 export const protobufPackage = "user.v1";
 
@@ -32,8 +33,6 @@ export interface User {
   isEmailVerified: boolean;
   lastLogin?: Date | null | undefined;
   isBanned: boolean;
-  banReason?: string | null | undefined;
-  bannedAt?: Date | null | undefined;
   refreshTokenHash?: string | null | undefined;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -61,7 +60,30 @@ export interface UpdateUserRequest {
 /** Message for banning a user */
 export interface BanUserRequest {
   id: string;
+  bannedBy: string;
   reason?: string | null | undefined;
+  banUntil?: Date | null | undefined;
+}
+
+/** Message for ban details */
+export interface BanDetails {
+  id: string;
+  userId: string;
+  isBanned: boolean;
+  bannedBy: string;
+  banReason?: string | null | undefined;
+  banUntil?: Date | null | undefined;
+  createdAt: Date | null;
+}
+
+/** Message for ban details response */
+export interface BanDetailsResponse {
+  banDetails: BanDetails[];
+}
+
+/** Message for getting banned users response */
+export interface GetBannedUsersResponse {
+  users: User[];
 }
 
 /** Message for password related requests */
@@ -90,7 +112,10 @@ wrappers[".google.protobuf.Timestamp"] = {
 /** UserService defines the gRPC service for managing users. */
 
 export interface UserServiceClient {
-  /** rpc to get user by id */
+  /**
+   * --- user access rpc methods ---
+   * rpc to get user by id
+   */
 
   getUserById(request: Id): Observable<User>;
 
@@ -110,13 +135,24 @@ export interface UserServiceClient {
 
   changePassword(request: PasswordRequest): Observable<StatusResponse>;
 
-  /** rpc to ban a user by id */
+  /**
+   * --- admin access rpc methods ---
+   * rpc to ban a user by id
+   */
 
   banUser(request: BanUserRequest): Observable<User>;
 
   /** rpc to unban a user by id */
 
-  unbanUser(request: Id): Observable<User>;
+  unbanUser(request: BanUserRequest): Observable<User>;
+
+  /** rpc to get all banned users */
+
+  getBannedUsers(request: Empty): Observable<GetBannedUsersResponse>;
+
+  /** get ban details by user id */
+
+  getBanDetailsByUserId(request: Id): Observable<BanDetailsResponse>;
 
   /** rpc to change user role */
 
@@ -126,7 +162,10 @@ export interface UserServiceClient {
 /** UserService defines the gRPC service for managing users. */
 
 export interface UserServiceController {
-  /** rpc to get user by id */
+  /**
+   * --- user access rpc methods ---
+   * rpc to get user by id
+   */
 
   getUserById(request: Id): Promise<User> | Observable<User> | User;
 
@@ -146,13 +185,26 @@ export interface UserServiceController {
 
   changePassword(request: PasswordRequest): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 
-  /** rpc to ban a user by id */
+  /**
+   * --- admin access rpc methods ---
+   * rpc to ban a user by id
+   */
 
   banUser(request: BanUserRequest): Promise<User> | Observable<User> | User;
 
   /** rpc to unban a user by id */
 
-  unbanUser(request: Id): Promise<User> | Observable<User> | User;
+  unbanUser(request: BanUserRequest): Promise<User> | Observable<User> | User;
+
+  /** rpc to get all banned users */
+
+  getBannedUsers(
+    request: Empty,
+  ): Promise<GetBannedUsersResponse> | Observable<GetBannedUsersResponse> | GetBannedUsersResponse;
+
+  /** get ban details by user id */
+
+  getBanDetailsByUserId(request: Id): Promise<BanDetailsResponse> | Observable<BanDetailsResponse> | BanDetailsResponse;
 
   /** rpc to change user role */
 
@@ -169,6 +221,8 @@ export function UserServiceControllerMethods() {
       "changePassword",
       "banUser",
       "unbanUser",
+      "getBannedUsers",
+      "getBanDetailsByUserId",
       "changeUserRole",
     ];
     for (const method of grpcMethods) {

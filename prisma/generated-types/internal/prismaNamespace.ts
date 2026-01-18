@@ -386,7 +386,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   PasswordResetToken: 'PasswordResetToken',
-  EmailVerificationToken: 'EmailVerificationToken'
+  EmailVerificationToken: 'EmailVerificationToken',
+  BanDetails: 'BanDetails'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -402,7 +403,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "emailVerificationToken"
+    modelProps: "user" | "passwordResetToken" | "emailVerificationToken" | "banDetails"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -628,6 +629,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BanDetails: {
+      payload: Prisma.$BanDetailsPayload<ExtArgs>
+      fields: Prisma.BanDetailsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BanDetailsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BanDetailsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        findFirst: {
+          args: Prisma.BanDetailsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BanDetailsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        findMany: {
+          args: Prisma.BanDetailsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>[]
+        }
+        create: {
+          args: Prisma.BanDetailsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        createMany: {
+          args: Prisma.BanDetailsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BanDetailsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>[]
+        }
+        delete: {
+          args: Prisma.BanDetailsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        update: {
+          args: Prisma.BanDetailsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        deleteMany: {
+          args: Prisma.BanDetailsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BanDetailsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BanDetailsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>[]
+        }
+        upsert: {
+          args: Prisma.BanDetailsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BanDetailsPayload>
+        }
+        aggregate: {
+          args: Prisma.BanDetailsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBanDetails>
+        }
+        groupBy: {
+          args: Prisma.BanDetailsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BanDetailsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BanDetailsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BanDetailsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -679,8 +754,6 @@ export const UserScalarFieldEnum = {
   isEmailVerified: 'isEmailVerified',
   lastLoginAt: 'lastLoginAt',
   isBanned: 'isBanned',
-  banReason: 'banReason',
-  bannedAt: 'bannedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -710,6 +783,19 @@ export const EmailVerificationTokenScalarFieldEnum = {
 } as const
 
 export type EmailVerificationTokenScalarFieldEnum = (typeof EmailVerificationTokenScalarFieldEnum)[keyof typeof EmailVerificationTokenScalarFieldEnum]
+
+
+export const BanDetailsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  isBanned: 'isBanned',
+  bannedBy: 'bannedBy',
+  banReason: 'banReason',
+  banUntil: 'banUntil',
+  createdAt: 'createdAt'
+} as const
+
+export type BanDetailsScalarFieldEnum = (typeof BanDetailsScalarFieldEnum)[keyof typeof BanDetailsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -902,6 +988,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   emailVerificationToken?: Prisma.EmailVerificationTokenOmit
+  banDetails?: Prisma.BanDetailsOmit
 }
 
 /* Types for Logging */

@@ -52,3 +52,8 @@ export type PasswordResetToken = Prisma.PasswordResetTokenModel
  * 
  */
 export type EmailVerificationToken = Prisma.EmailVerificationTokenModel
+/**
+ * Model BanDetails
+ * 
+ */
+export type BanDetails = Prisma.BanDetailsModel

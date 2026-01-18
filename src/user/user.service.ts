@@ -7,6 +7,7 @@ import type { UserRole as PrismaUserRole } from 'prisma/generated-types/enums';
 
 import {
   UserRole,
+  type BanDetailsResponse,
   type BanUserRequest,
   type PasswordRequest,
   type StatusResponse,
@@ -142,9 +143,17 @@ export class UserService {
         throw AppError.badRequest('User is already banned');
       }
 
+      await this.userRepository.createBanDetails({
+        userId: data.id,
+        bannedBy: data.bannedBy,
+        banReason: data.reason || null,
+        banUntil: data.banUntil || null,
+        isBanned: true,
+      });
+
       const bannedUser = await this.userRepository.updateUser({
         id: data.id,
-        data: { isBanned: true, banReason: data.reason, bannedAt: new Date() },
+        data: { isBanned: true },
       });
       this.logger.log(`User banned with ID: ${data.id}`);
       return {
@@ -158,24 +167,32 @@ export class UserService {
     }
   }
 
-  async unbanUser(id: string): Promise<User> {
-    this.logger.log(`Unbanning user with ID: ${id}`);
+  async unbanUser(data: BanUserRequest): Promise<User> {
+    this.logger.log(`Unbanning user with ID: ${data.id}`);
     try {
-      const user = await this.userRepository.findUserById(id);
+      const user = await this.userRepository.findUserById(data.id);
       if (!user) {
-        this.logger.warn(`User not found with ID: ${id}`);
+        this.logger.warn(`User not found with ID: ${data.id}`);
         throw AppError.notFound('User not found');
       }
       if (!user.isBanned) {
-        this.logger.warn(`User is not banned with ID: ${id}`);
+        this.logger.warn(`User is not banned with ID: ${data.id}`);
         throw AppError.badRequest('User is not banned');
       }
 
-      const unbannedUser = await this.userRepository.updateUser({
-        id,
-        data: { isBanned: false, banReason: null, bannedAt: null },
+      await this.userRepository.createBanDetails({
+        userId: data.id,
+        bannedBy: data.bannedBy,
+        banReason: data.reason || 'Unbanned',
+        banUntil: null,
+        isBanned: false,
       });
-      this.logger.log(`User unbanned with ID: ${id}`);
+
+      const unbannedUser = await this.userRepository.updateUser({
+        id: data.id,
+        data: { isBanned: false },
+      });
+      this.logger.log(`User unbanned with ID: ${data.id}`);
       return {
         ...unbannedUser,
         role: convertEnum(UserRole, unbannedUser.role),
@@ -185,6 +202,22 @@ export class UserService {
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to unban user');
     }
+  }
+
+  async getBannedUsers(): Promise<User[]> {
+    this.logger.log('Getting all banned users');
+    const bannedUsers = await this.userRepository.getBannedUsers();
+
+    return bannedUsers.map((user) => ({
+      ...user,
+      role: convertEnum(UserRole, user.role),
+    }));
+  }
+
+  async getBanDetailsByUserId(userId: string): Promise<BanDetailsResponse> {
+    this.logger.log(`Getting ban details for user ID: ${userId}`);
+    const banDetails = await this.userRepository.getBanDetailsByUserId(userId);
+    return { banDetails };
   }
 
   async changeUserRole(data: { id: string; role: UserRole }): Promise<User> {
