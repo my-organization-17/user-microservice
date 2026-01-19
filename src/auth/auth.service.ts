@@ -7,6 +7,7 @@ import { HashService } from 'src/hash/hash.service';
 import { UserRepository } from 'src/user/user.repository';
 import { AppError } from 'src/utils/errors/app-error';
 import { convertEnum } from 'src/utils/convertEnum';
+import { RedisService } from 'src/redis/redis.service';
 import { AuthRepository } from './auth.repository';
 
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
+    private readonly redisService: RedisService,
   ) {}
   protected readonly logger = new Logger(AuthService.name);
 
@@ -27,23 +29,48 @@ export class AuthService {
     return crypto.randomBytes(32).toString('hex');
   }
 
-  private async generateJwtTokens(userId: string, isBanned: boolean, role: UserRole): Promise<[string, string]> {
-    return Promise.all([
+  private refreshKey(userId: string, sessionId: string) {
+    return `refresh:${userId}:${sessionId}`;
+  }
+
+  private async generateJwtTokens({
+    userId,
+    isBanned,
+    role,
+    sid,
+  }: {
+    userId: string;
+    isBanned: boolean;
+    role: UserRole;
+    sid?: string;
+  }): Promise<RefreshTokensResponse> {
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, isBanned, role },
+        { sub: userId, isBanned, role, sid },
         {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
           expiresIn: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
         },
       ),
       this.jwtService.signAsync(
-        { sub: userId, isBanned, role },
+        { sub: userId, isBanned, role, sid },
         {
           secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
         },
       ),
     ]);
+
+    const hash = await this.hashService.create(refreshToken);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await this.redisService.set(
+      this.refreshKey(userId, sid ?? ''),
+      hash,
+      'EX',
+      this.configService.getOrThrow<number>('JWT_REFRESH_EXPIRATION'),
+    );
+    return { accessToken, refreshToken };
   }
 
   async signUp(data: SignUpRequest): Promise<User> {
@@ -133,19 +160,17 @@ export class AuthService {
       });
 
       // Generate JWT tokens
-      const [accessToken, refreshToken] = await this.generateJwtTokens(
-        emailVerification.userId,
-        emailVerification.user.isBanned,
-        convertEnum(UserRole, emailVerification.user.role),
-      );
+      const { accessToken, refreshToken } = await this.generateJwtTokens({
+        userId: emailVerification.userId,
+        isBanned: emailVerification.user.isBanned,
+        role: convertEnum(UserRole, emailVerification.user.role),
+        sid: crypto.randomUUID(),
+      });
 
-      // Update user record with hashed refresh token and set email as verified
+      // Update user's isEmailVerified status
       const updatedUser = await this.userRepository.updateUser({
         id: emailVerification.userId,
-        data: {
-          refreshTokenHash: await this.hashService.create(refreshToken),
-          isEmailVerified: true,
-        },
+        data: { isEmailVerified: true },
       });
 
       this.logger.log(`Email verified for user ID: ${emailVerification.userId}`);
@@ -178,18 +203,11 @@ export class AuthService {
       await this.hashService.compare(data.password, user.passwordHash);
 
       // Generate JWT tokens
-      const [accessToken, refreshToken] = await this.generateJwtTokens(
-        user.id,
-        user.isBanned,
-        convertEnum(UserRole, user.role),
-      );
-
-      // Update user record with hashed refresh token
-      await this.userRepository.updateUser({
-        id: user.id,
-        data: {
-          refreshTokenHash: await this.hashService.create(refreshToken),
-        },
+      const { accessToken, refreshToken } = await this.generateJwtTokens({
+        userId: user.id,
+        isBanned: user.isBanned,
+        role: convertEnum(UserRole, user.role),
+        sid: crypto.randomUUID(),
       });
 
       this.logger.log(`User signed in with ID: ${user.id}`);
@@ -210,9 +228,13 @@ export class AuthService {
 
   async refreshTokens(token: string): Promise<RefreshTokensResponse> {
     this.logger.log(`Refreshing token`);
+    if (!token) {
+      this.logger.warn(`No refresh token provided`);
+      throw AppError.unauthorized('No refresh token provided');
+    }
     try {
       // Verify the provided token
-      const payload = await this.jwtService.verifyAsync<{ sub: string; isBanned: boolean }>(token, {
+      const payload = await this.jwtService.verifyAsync<{ sub: string; isBanned: boolean; sid: string }>(token, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
       if (!payload || !payload.sub) {
@@ -222,27 +244,30 @@ export class AuthService {
 
       // Find the user
       const user = await this.userRepository.findUserById(payload.sub);
-      if (!user || !user.refreshTokenHash) {
-        this.logger.warn(`Invalid refresh token for user ID: ${payload.sub}`);
+      if (!user) {
+        this.logger.warn(`User not found with ID: ${payload.sub}`);
+        throw AppError.unauthorized('Invalid refresh token');
+      }
+
+      // Retrieve the stored refresh token hash from Redis
+      const key = this.refreshKey(payload.sub, payload.sid);
+      this.logger.log(`Retrieving refresh token hash from Redis with key: ${key}`);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const storedHash = (await this.redisService.get(key)) as string | null;
+      if (!storedHash) {
+        this.logger.warn(`No refresh token hash found in Redis for user ID: ${user.id}`);
         throw AppError.unauthorized('Invalid refresh token');
       }
 
       // Verify the refresh token hash
-      await this.hashService.validate(token, user.refreshTokenHash);
+      await this.hashService.validate(token, storedHash);
 
       // Generate new JWT tokens
-      const [accessToken, refreshToken] = await this.generateJwtTokens(
-        user.id,
-        user.isBanned,
-        convertEnum(UserRole, user.role),
-      );
-
-      // Update user record with new hashed refresh token
-      await this.userRepository.updateUser({
-        id: user.id,
-        data: {
-          refreshTokenHash: await this.hashService.create(refreshToken),
-        },
+      const { accessToken, refreshToken } = await this.generateJwtTokens({
+        userId: user.id,
+        isBanned: user.isBanned,
+        role: convertEnum(UserRole, user.role),
+        sid: crypto.randomUUID(),
       });
 
       this.logger.log(`Tokens refreshed for user ID: ${user.id}`);

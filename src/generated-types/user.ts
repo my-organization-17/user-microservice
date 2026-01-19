@@ -33,7 +33,6 @@ export interface User {
   isEmailVerified: boolean;
   lastLogin?: Date | null | undefined;
   isBanned: boolean;
-  refreshTokenHash?: string | null | undefined;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

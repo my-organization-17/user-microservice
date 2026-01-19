@@ -23,14 +23,13 @@ model User {
   role                    UserRole                @default(USER)
   avatarUrl               String?                 @map("avatar_url")
   passwordHash            String                  @map("password_hash")
-  refreshTokenHash        String?                 @map("refresh_token_hash")
   isEmailVerified         Boolean                 @default(false) @map("is_email_verified")
   lastLoginAt             DateTime?               @map("last_login_at")
   isBanned                Boolean                 @default(false) @map("is_banned")
   createdAt               DateTime                @default(now()) @map("created_at")
   updatedAt               DateTime                @default(now()) @updatedAt @map("updated_at")
-  passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken?
+  passwordResetTokens     PasswordResetToken[]
   banDetails              BanDetails[]
 
   @@map("users")

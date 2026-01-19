@@ -8,6 +8,7 @@ import { HealthCheckModule } from './health-check/health-check.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { HashModule } from './hash/hash.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { HashModule } from './hash/hash.module';
     UserModule,
     AuthModule,
     HashModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [],

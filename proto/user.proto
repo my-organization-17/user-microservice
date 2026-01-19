@@ -44,9 +44,8 @@ message User {
   bool is_email_verified = 8;
   optional google.protobuf.Timestamp last_login = 9; 
   bool is_banned = 10;
-  optional string refresh_token_hash = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
 }
 
 // user roles enumeration

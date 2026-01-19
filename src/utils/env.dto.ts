@@ -26,4 +26,13 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   @IsPositive()
   readonly JWT_REFRESH_EXPIRATION: number;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly REDIS_HOST: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  readonly REDIS_PORT: number;
 }
