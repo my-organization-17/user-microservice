@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 
-import type { EmailVerificationToken, User } from 'prisma/generated-types/client';
+import type { EmailVerificationToken, PasswordResetToken, User } from 'prisma/generated-types/client';
 
 interface EmailVerificationTokenWithUser extends EmailVerificationToken {
   user: User;
@@ -16,7 +16,7 @@ export class AuthRepository {
   // Find email verification token by token string
   async findEmailVerificationTokenByToken(token: string): Promise<EmailVerificationTokenWithUser | null> {
     this.logger.log(`Finding email verification token: ${token}`);
-    return await this.prisma.emailVerificationToken.findUnique({
+    return await this.prisma.emailVerificationToken.findFirst({
       where: { token },
       include: { user: true },
     });
@@ -55,16 +55,70 @@ export class AuthRepository {
     userId,
     token,
     expiresAt,
+    verifiedAt,
   }: {
     userId: string;
     token: string;
-    expiresAt: Date;
+    expiresAt?: Date;
+    verifiedAt?: Date;
   }): Promise<EmailVerificationToken | null> {
     this.logger.log(`Updating email verification token for user ID: ${userId}`);
     return await this.prisma.emailVerificationToken.update({
       where: { userId },
       data: {
         token,
+        expiresAt,
+        verifiedAt,
+      },
+    });
+  }
+
+  // create password reset token
+  async createPasswordResetToken({
+    userId,
+    token,
+    expiresAt,
+  }: {
+    userId: string;
+    token: string;
+    expiresAt: Date;
+  }): Promise<PasswordResetToken> {
+    this.logger.log(`Creating password reset token for user ID: ${userId}`);
+    return await this.prisma.passwordResetToken.create({
+      data: {
+        userId,
+        token,
+        expiresAt,
+      },
+    });
+  }
+
+  // Find password reset token by token string
+  async findPasswordResetTokenByToken(token: string): Promise<PasswordResetToken | null> {
+    this.logger.log(`Finding password reset token: ${token}`);
+    return await this.prisma.passwordResetToken.findFirst({
+      where: { token },
+    });
+  }
+
+  // Update password reset token by ID
+  async updatePasswordResetTokenById({
+    id,
+    token,
+    changedAt,
+    expiresAt,
+  }: {
+    id: string;
+    token: string;
+    changedAt?: Date;
+    expiresAt?: Date;
+  }): Promise<PasswordResetToken | null> {
+    this.logger.log(`Updating password reset token ID: ${id}`);
+    return await this.prisma.passwordResetToken.update({
+      where: { id },
+      data: {
+        token,
+        changedAt,
         expiresAt,
       },
     });

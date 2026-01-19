@@ -17,7 +17,7 @@ service AuthService {
   // rpc to resend confirmation email
   rpc ResendEmail(Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
-  rpc ResetPassword(Email) returns (user.v1.StatusResponse) {}
+  rpc InitResetPassword(Email) returns (user.v1.StatusResponse) {}
   // rpc to set new password
   rpc SetNewPassword(SetNewPasswordRequest) returns (user.v1.StatusResponse) {}
 }

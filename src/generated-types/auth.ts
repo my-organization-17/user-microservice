@@ -81,7 +81,7 @@ export interface AuthServiceClient {
 
   /** rpc to reset password */
 
-  resetPassword(request: Email): Observable<StatusResponse>;
+  initResetPassword(request: Email): Observable<StatusResponse>;
 
   /** rpc to set new password */
 
@@ -115,7 +115,7 @@ export interface AuthServiceController {
 
   /** rpc to reset password */
 
-  resetPassword(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+  initResetPassword(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 
   /** rpc to set new password */
 
@@ -130,7 +130,7 @@ export function AuthServiceControllerMethods() {
       "verifyEmail",
       "refreshTokens",
       "resendEmail",
-      "resetPassword",
+      "initResetPassword",
       "setNewPassword",
     ];
     for (const method of grpcMethods) {

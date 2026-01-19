@@ -29,20 +29,20 @@ model User {
   createdAt               DateTime                @default(now()) @map("created_at")
   updatedAt               DateTime                @default(now()) @updatedAt @map("updated_at")
   emailVerificationTokens EmailVerificationToken?
-  passwordResetTokens     PasswordResetToken[]
+  passwordResetTokens     PasswordResetToken?
   banDetails              BanDetails[]
 
   @@map("users")
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  token     String   @unique
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  changedAt DateTime @map("changed_at")
-  user      User     @relation(fields: [userId], references: [id])
+  id        String    @id @default(uuid())
+  userId    String    @unique @map("user_id")
+  token     String
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  changedAt DateTime? @map("changed_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
 }
@@ -50,7 +50,7 @@ model PasswordResetToken {
 model EmailVerificationToken {
   id         String    @id @default(uuid())
   userId     String    @unique @map("user_id")
-  token      String    @unique
+  token      String
   expiresAt  DateTime  @map("expires_at")
   createdAt  DateTime  @default(now()) @map("created_at")
   verifiedAt DateTime? @map("verified_at")

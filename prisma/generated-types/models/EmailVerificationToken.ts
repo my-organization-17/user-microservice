@@ -206,15 +206,15 @@ export type EmailVerificationTokenOrderByWithRelationInput = {
 export type EmailVerificationTokenWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   userId?: string
-  token?: string
   AND?: Prisma.EmailVerificationTokenWhereInput | Prisma.EmailVerificationTokenWhereInput[]
   OR?: Prisma.EmailVerificationTokenWhereInput[]
   NOT?: Prisma.EmailVerificationTokenWhereInput | Prisma.EmailVerificationTokenWhereInput[]
+  token?: Prisma.StringFilter<"EmailVerificationToken"> | string
   expiresAt?: Prisma.DateTimeFilter<"EmailVerificationToken"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"EmailVerificationToken"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"EmailVerificationToken"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "userId" | "token">
+}, "id" | "userId">
 
 export type EmailVerificationTokenOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

@@ -11,7 +11,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { AuthRepository } from './auth.repository';
 
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
-import { UserRole, type User } from 'src/generated-types/user';
+import { StatusResponse, UserRole, type User } from 'src/generated-types/user';
 
 @Injectable()
 export class AuthService {
@@ -150,12 +150,16 @@ export class AuthService {
         this.logger.warn(`Expired email verification token: ${token}`);
         throw AppError.badRequest('Invalid or expired email verification token');
       }
+      if (emailVerification.verifiedAt) {
+        this.logger.warn(`Email already verified for token: ${token}`);
+        throw AppError.badRequest('Email is already verified');
+      }
 
       // Update the email verification record
       await this.authRepository.updateEmailVerificationToken({
         userId: emailVerification.userId,
         token: '',
-        expiresAt: new Date(),
+        verifiedAt: new Date(),
       });
 
       // Generate JWT tokens
@@ -198,8 +202,41 @@ export class AuthService {
         throw AppError.unauthorized('Invalid email or password');
       }
 
+      // Check if email is verified
+      if (!user.isEmailVerified) {
+        const emailVerification = await this.authRepository.findEmailVerificationTokenByUserId(user.id);
+        if (!emailVerification) {
+          const token = this.generateCryptoToken();
+          await this.authRepository.createEmailVerificationToken({
+            userId: user.id,
+            token,
+            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+          });
+          this.logger.log(`Resent email verification token for user ID: ${user.id}`);
+          throw AppError.unauthorized('Email not verified. Verification email resent.');
+        }
+        if (emailVerification.expiresAt <= new Date()) {
+          const token = this.generateCryptoToken();
+          await this.authRepository.updateEmailVerificationToken({
+            userId: user.id,
+            token,
+            expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+          });
+          this.logger.log(`Resent expired email verification token for user ID: ${user.id}`);
+          throw AppError.unauthorized('Email not verified. Verification email resent.');
+        }
+        this.logger.warn(`Email not verified for user with email: ${data.email}`);
+        throw AppError.unauthorized('Email not verified. Please check your email for verification link.');
+      }
+
       // Verify password
       await this.hashService.compare(data.password, user.passwordHash);
+
+      // Update last login timestamp
+      await this.userRepository.updateUser({
+        id: user.id,
+        data: { lastLoginAt: new Date() },
+      });
 
       // Generate JWT tokens
       const { accessToken, refreshToken } = await this.generateJwtTokens({
@@ -286,5 +323,87 @@ export class AuthService {
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to refresh token');
     }
+  }
+
+  async initResetPassword(email: string): Promise<StatusResponse> {
+    this.logger.log(`Initiating password reset for email: ${email}`);
+    const user = await this.userRepository.findUserByEmail(email);
+    if (!user) {
+      this.logger.warn(`User not found with email: ${email}`);
+      throw AppError.badRequest('User with the provided email does not exist');
+    }
+    if (!user.isEmailVerified) {
+      this.logger.warn(`Email not verified for user with email: ${email}`);
+      throw AppError.badRequest('Email is not verified');
+    }
+
+    // Check if a password reset token already exists for the user
+    const existingToken = await this.authRepository.findPasswordResetTokenByToken(user.id);
+    if (existingToken && existingToken.expiresAt > new Date()) {
+      this.logger.log(`Existing valid password reset token found for user ID: ${user.id}`);
+      throw AppError.badRequest('A valid password reset token already exists');
+    }
+
+    // Create a new password reset token
+    const token = this.generateCryptoToken();
+    if (existingToken) {
+      await this.authRepository.updatePasswordResetTokenById({
+        id: existingToken.id,
+        token,
+        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+      });
+      this.logger.log(`Updated password reset token for user ID: ${user.id}`);
+    } else {
+      await this.authRepository.createPasswordResetToken({
+        userId: user.id,
+        token,
+        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+      });
+      this.logger.log(`Created password reset token for user ID: ${user.id}`);
+    }
+
+    return { success: true, message: 'Password reset token generated successfully' };
+  }
+
+  async setNewPassword(token: string, password: string): Promise<StatusResponse> {
+    this.logger.log(`Setting new password with token: ${token}`);
+    // Find the password reset record
+    const passwordReset = await this.authRepository.findPasswordResetTokenByToken(token);
+    if (!passwordReset) {
+      this.logger.warn(`Invalid password reset token: ${token}`);
+      throw AppError.badRequest('Invalid or expired password reset token');
+    }
+    if (passwordReset.expiresAt <= new Date()) {
+      this.logger.warn(`Expired password reset token: ${token}`);
+      throw AppError.badRequest('Invalid or expired password reset token');
+    }
+
+    // find the user
+    const user = await this.userRepository.findUserById(passwordReset.userId);
+    if (!user) {
+      this.logger.warn(`User not found with ID: ${passwordReset.userId}`);
+      throw AppError.badRequest('Invalid password reset token');
+    }
+
+    // Ensure the new password is different from the old one
+    await this.hashService.same(password, user.passwordHash);
+
+    // Hash the new password
+    const passwordHash = await this.hashService.create(password);
+
+    // Update the user's password
+    await this.userRepository.updateUser({
+      id: passwordReset.userId,
+      data: { passwordHash },
+    });
+
+    // Invalidate the used password reset token
+    await this.authRepository.updatePasswordResetTokenById({
+      id: passwordReset.id,
+      token: '',
+      changedAt: new Date(),
+    });
+    this.logger.log(`Password reset successfully for user ID: ${passwordReset.userId}`);
+    return { success: true, message: 'Password reset successfully' };
   }
 }

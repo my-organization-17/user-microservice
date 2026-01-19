@@ -10,7 +10,7 @@ import {
   type RefreshTokensResponse,
   type SignUpRequest,
 } from 'src/generated-types/auth';
-import type { User } from 'src/generated-types/user';
+import type { StatusResponse, User } from 'src/generated-types/user';
 
 @Controller('auth')
 export class AuthController {
@@ -39,5 +39,17 @@ export class AuthController {
   async refreshToken(data: Token): Promise<RefreshTokensResponse> {
     this.logger.log(`Received RefreshToken request with token: ${data.token}`);
     return await this.authService.refreshTokens(data.token);
+  }
+
+  @GrpcMethod(AUTH_SERVICE_NAME, 'InitResetPassword')
+  async initResetPassword(data: { email: string }): Promise<StatusResponse> {
+    this.logger.log(`Received InitResetPassword request for email: ${data.email}`);
+    return await this.authService.initResetPassword(data.email);
+  }
+
+  @GrpcMethod(AUTH_SERVICE_NAME, 'SetNewPassword')
+  async setNewPassword(data: { token: string; password: string }): Promise<StatusResponse> {
+    this.logger.log(`Received SetNewPassword request with token: ${data.token}`);
+    return await this.authService.setNewPassword(data.token, data.password);
   }
 }
