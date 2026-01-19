@@ -37,11 +37,6 @@ export class HashService {
   }
 
   async validate(token: string, hash: string): Promise<boolean> {
-    const isValid = await bcrypt.compare(token, hash);
-    if (!isValid) {
-      this.logger.warn('Invalid token');
-      throw AppError.unauthorized('Invalid token');
-    }
-    return isValid;
+    return await bcrypt.compare(token, hash);
   }
 }

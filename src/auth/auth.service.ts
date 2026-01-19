@@ -254,11 +254,19 @@ export class AuthService {
       const storedHash = await this.redisService.get(key);
       if (!storedHash) {
         this.logger.warn(`No refresh token hash found in Redis for user ID: ${user.id}`);
-        throw AppError.unauthorized('Invalid refresh token');
+        throw AppError.unauthorized('Invalid token');
       }
 
       // Verify the refresh token hash
-      await this.hashService.validate(token, storedHash);
+      const isValid = await this.hashService.validate(token, storedHash);
+
+      // Delete the old refresh token from Redis
+      await this.redisService.del(key);
+
+      if (!isValid) {
+        this.logger.warn('Invalid token');
+        throw AppError.unauthorized('Invalid token');
+      }
 
       // Generate new JWT tokens
       const { accessToken, refreshToken } = await this.generateJwtTokens({
