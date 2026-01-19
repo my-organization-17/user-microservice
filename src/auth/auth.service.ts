@@ -63,7 +63,6 @@ export class AuthService {
 
     const hash = await this.hashService.create(refreshToken);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await this.redisService.set(
       this.refreshKey(userId, sid ?? ''),
       hash,
@@ -252,8 +251,7 @@ export class AuthService {
       // Retrieve the stored refresh token hash from Redis
       const key = this.refreshKey(payload.sub, payload.sid);
       this.logger.log(`Retrieving refresh token hash from Redis with key: ${key}`);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const storedHash = (await this.redisService.get(key)) as string | null;
+      const storedHash = await this.redisService.get(key);
       if (!storedHash) {
         this.logger.warn(`No refresh token hash found in Redis for user ID: ${user.id}`);
         throw AppError.unauthorized('Invalid refresh token');
