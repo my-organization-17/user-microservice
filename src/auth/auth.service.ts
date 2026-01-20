@@ -1,24 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 import { HashService } from 'src/hash/hash.service';
+import { TokenService } from 'src/token/token.service';
 import { UserRepository } from 'src/user/user.repository';
 import { AppError } from 'src/utils/errors/app-error';
 import { convertEnum } from 'src/utils/convertEnum';
 import { RedisService } from 'src/redis/redis.service';
 import { AuthRepository } from './auth.repository';
 
-import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
 import { type StatusResponse, UserRole, type User } from 'src/generated-types/user';
+import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly hashService: HashService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly tokenService: TokenService,
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
     private readonly redisService: RedisService,
@@ -27,49 +25,6 @@ export class AuthService {
 
   private generateCryptoToken(): string {
     return crypto.randomBytes(32).toString('hex');
-  }
-
-  private refreshKey(userId: string, sessionId: string) {
-    return `refresh:${userId}:${sessionId}`;
-  }
-
-  private async generateJwtTokens({
-    userId,
-    isBanned,
-    role,
-    sid,
-  }: {
-    userId: string;
-    isBanned: boolean;
-    role: UserRole;
-    sid?: string;
-  }): Promise<RefreshTokensResponse> {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, isBanned, role, sid },
-        {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: this.configService.get<number>('JWT_ACCESS_EXPIRATION'),
-        },
-      ),
-      this.jwtService.signAsync(
-        { sub: userId, isBanned, role, sid },
-        {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<number>('JWT_REFRESH_EXPIRATION'),
-        },
-      ),
-    ]);
-
-    const hash = await this.hashService.create(refreshToken);
-
-    await this.redisService.set(
-      this.refreshKey(userId, sid ?? ''),
-      hash,
-      'EX',
-      this.configService.getOrThrow<number>('JWT_REFRESH_EXPIRATION'),
-    );
-    return { accessToken, refreshToken };
   }
 
   async signUp(data: SignUpRequest): Promise<User> {
@@ -202,7 +157,7 @@ export class AuthService {
       });
 
       // Generate JWT tokens
-      const { accessToken, refreshToken } = await this.generateJwtTokens({
+      const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens({
         userId: emailVerification.userId,
         isBanned: emailVerification.user.isBanned,
         role: convertEnum(UserRole, emailVerification.user.role),
@@ -282,7 +237,7 @@ export class AuthService {
       });
 
       // Generate JWT tokens
-      const { accessToken, refreshToken } = await this.generateJwtTokens({
+      const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens({
         userId: user.id,
         isBanned: user.isBanned,
         role: convertEnum(UserRole, user.role),
@@ -313,9 +268,7 @@ export class AuthService {
     }
     try {
       // Verify the provided token
-      const payload = await this.jwtService.verifyAsync<{ sub: string; isBanned: boolean; sid: string }>(token, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      });
+      const payload = await this.tokenService.verifyJwtToken<{ sub: string; isBanned: boolean; sid: string }>(token);
       if (!payload || !payload.sub) {
         this.logger.warn(`Invalid refresh token`);
         throw AppError.unauthorized('Invalid refresh token');
@@ -329,7 +282,7 @@ export class AuthService {
       }
 
       // Retrieve the stored refresh token hash from Redis
-      const key = this.refreshKey(payload.sub, payload.sid);
+      const key = this.tokenService.refreshKey(payload.sub, payload.sid);
       this.logger.log(`Retrieving refresh token hash from Redis with key: ${key}`);
       const storedHash = await this.redisService.get(key);
       if (!storedHash) {
@@ -349,7 +302,7 @@ export class AuthService {
       }
 
       // Generate new JWT tokens
-      const { accessToken, refreshToken } = await this.generateJwtTokens({
+      const { accessToken, refreshToken } = await this.tokenService.generateJwtTokens({
         userId: user.id,
         isBanned: user.isBanned,
         role: convertEnum(UserRole, user.role),

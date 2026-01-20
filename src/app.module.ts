@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 import { validateEnv } from './utils/validators/env-validator';
 import { EnvironmentVariables } from './utils/env.dto';
@@ -9,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { HashModule } from './hash/hash.module';
 import { RedisModule } from './redis/redis.module';
+import { TokenModule } from './token/token.module';
 
 @Module({
   imports: [
@@ -17,12 +19,16 @@ import { RedisModule } from './redis/redis.module';
       envFilePath: ['.env.local'],
       validate: (config) => validateEnv(config, EnvironmentVariables),
     }),
+    JwtModule.register({
+      global: true,
+    }),
     PrismaModule,
     HealthCheckModule,
     UserModule,
     AuthModule,
     HashModule,
     RedisModule,
+    TokenModule,
   ],
   controllers: [],
   providers: [],
