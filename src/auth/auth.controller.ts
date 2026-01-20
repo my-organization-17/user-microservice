@@ -4,8 +4,8 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import {
   AUTH_SERVICE_NAME,
-  SignInRequest,
-  Token,
+  type SignInRequest,
+  type Token,
   type AuthResponse,
   type RefreshTokensResponse,
   type SignUpRequest,
@@ -21,6 +21,12 @@ export class AuthController {
   async signUp(data: SignUpRequest): Promise<User> {
     this.logger.log(`Received SignUp request for email: ${data.email}`);
     return await this.authService.signUp(data);
+  }
+
+  @GrpcMethod(AUTH_SERVICE_NAME, 'ResendConfirmationEmail')
+  async resendConfirmationEmail(data: { email: string }): Promise<StatusResponse> {
+    this.logger.log(`Received ResendConfirmationEmail request for email: ${data.email}`);
+    return await this.authService.resendConfirmationEmail(data.email);
   }
 
   @GrpcMethod(AUTH_SERVICE_NAME, 'VerifyEmail')
@@ -45,6 +51,12 @@ export class AuthController {
   async initResetPassword(data: { email: string }): Promise<StatusResponse> {
     this.logger.log(`Received InitResetPassword request for email: ${data.email}`);
     return await this.authService.initResetPassword(data.email);
+  }
+
+  @GrpcMethod(AUTH_SERVICE_NAME, 'ResendResetPasswordEmail')
+  async resendResetPasswordEmail(data: { email: string }): Promise<StatusResponse> {
+    this.logger.log(`Received ResendResetPasswordEmail request for email: ${data.email}`);
+    return await this.authService.resendResetPasswordEmail(data.email);
   }
 
   @GrpcMethod(AUTH_SERVICE_NAME, 'SetNewPassword')

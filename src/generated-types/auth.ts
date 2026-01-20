@@ -71,17 +71,21 @@ export interface AuthServiceClient {
 
   verifyEmail(request: Token): Observable<AuthResponse>;
 
+  /** rpc to resend confirmation email */
+
+  resendConfirmationEmail(request: Email): Observable<StatusResponse>;
+
   /** rpc to refresh tokens */
 
   refreshTokens(request: Token): Observable<RefreshTokensResponse>;
 
-  /** rpc to resend confirmation email */
-
-  resendEmail(request: Email): Observable<StatusResponse>;
-
   /** rpc to reset password */
 
   initResetPassword(request: Email): Observable<StatusResponse>;
+
+  /** rpc to resend reset password email */
+
+  resendResetPasswordEmail(request: Email): Observable<StatusResponse>;
 
   /** rpc to set new password */
 
@@ -103,19 +107,23 @@ export interface AuthServiceController {
 
   verifyEmail(request: Token): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
+  /** rpc to resend confirmation email */
+
+  resendConfirmationEmail(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
   /** rpc to refresh tokens */
 
   refreshTokens(
     request: Token,
   ): Promise<RefreshTokensResponse> | Observable<RefreshTokensResponse> | RefreshTokensResponse;
 
-  /** rpc to resend confirmation email */
-
-  resendEmail(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
-
   /** rpc to reset password */
 
   initResetPassword(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to resend reset password email */
+
+  resendResetPasswordEmail(request: Email): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 
   /** rpc to set new password */
 
@@ -128,9 +136,10 @@ export function AuthServiceControllerMethods() {
       "signUp",
       "signIn",
       "verifyEmail",
+      "resendConfirmationEmail",
       "refreshTokens",
-      "resendEmail",
       "initResetPassword",
+      "resendResetPasswordEmail",
       "setNewPassword",
     ];
     for (const method of grpcMethods) {

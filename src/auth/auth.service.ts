@@ -11,7 +11,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { AuthRepository } from './auth.repository';
 
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
-import { StatusResponse, UserRole, type User } from 'src/generated-types/user';
+import { type StatusResponse, UserRole, type User } from 'src/generated-types/user';
 
 @Injectable()
 export class AuthService {
@@ -134,6 +134,45 @@ export class AuthService {
       this.logger.error(`Error during sign up: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to sign up user');
+    }
+  }
+
+  async resendConfirmationEmail(email: string): Promise<StatusResponse> {
+    this.logger.log(`Resending confirmation email to: ${email}`);
+    try {
+      const user = await this.userRepository.findUserByEmail(email);
+      if (!user) {
+        this.logger.warn(`User not found with email: ${email}`);
+        throw AppError.badRequest('User with the provided email does not exist');
+      }
+      if (user.isEmailVerified) {
+        this.logger.warn(`Email is already verified: ${email}`);
+        throw AppError.badRequest('Email is already verified');
+      }
+
+      const emailVerification = await this.authRepository.findEmailVerificationTokenByUserId(user.id);
+      const token = this.generateCryptoToken();
+      if (emailVerification) {
+        await this.authRepository.updateEmailVerificationToken({
+          userId: user.id,
+          token,
+          expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+        });
+        this.logger.log(`Updated email verification token for user ID: ${user.id}`);
+      } else {
+        await this.authRepository.createEmailVerificationToken({
+          userId: user.id,
+          token,
+          expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+        });
+        this.logger.log(`Created email verification token for user ID: ${user.id}`);
+      }
+
+      return { success: true, message: 'Confirmation email resent successfully' };
+    } catch (error) {
+      this.logger.error(`Error during resending confirmation email: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to resend confirmation email');
     }
   }
 
@@ -363,6 +402,29 @@ export class AuthService {
     }
 
     return { success: true, message: 'Password reset token generated successfully' };
+  }
+
+  async resendResetPasswordEmail(email: string): Promise<StatusResponse> {
+    this.logger.log(`Resending password reset email to: ${email}`);
+    const user = await this.userRepository.findUserByEmail(email);
+    if (!user) {
+      this.logger.warn(`User not found with email: ${email}`);
+      throw AppError.badRequest('User with the provided email does not exist');
+    }
+    if (!user.isEmailVerified) {
+      this.logger.warn(`Email not verified for user with email: ${email}`);
+      throw AppError.badRequest('Email is not verified');
+    }
+
+    // Find existing password reset token
+    const passwordReset = await this.authRepository.findPasswordResetTokenByToken(user.id);
+    if (!passwordReset || passwordReset.expiresAt <= new Date()) {
+      this.logger.warn(`No valid password reset token found for user ID: ${user.id}`);
+      throw AppError.badRequest('No valid password reset token found. Please initiate password reset again.');
+    }
+
+    this.logger.log(`Password reset token resent for user ID: ${user.id}`);
+    return { success: true, message: 'Password reset email resent successfully' };
   }
 
   async setNewPassword(token: string, password: string): Promise<StatusResponse> {

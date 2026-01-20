@@ -12,12 +12,14 @@ service AuthService {
   rpc SignIn(SignInRequest) returns (AuthResponse) {}
   // rpc to verify email
   rpc VerifyEmail(Token) returns (AuthResponse) {}
+  // rpc to resend confirmation email
+  rpc ResendConfirmationEmail(Email) returns (user.v1.StatusResponse) {}
   // rpc to refresh tokens
   rpc RefreshTokens(Token) returns (RefreshTokensResponse) {}
-  // rpc to resend confirmation email
-  rpc ResendEmail(Email) returns (user.v1.StatusResponse) {}
   // rpc to reset password
   rpc InitResetPassword(Email) returns (user.v1.StatusResponse) {}
+  // rpc to resend reset password email
+  rpc ResendResetPasswordEmail(Email) returns (user.v1.StatusResponse) {}
   // rpc to set new password
   rpc SetNewPassword(SetNewPasswordRequest) returns (user.v1.StatusResponse) {}
 }
