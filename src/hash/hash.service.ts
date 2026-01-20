@@ -19,12 +19,7 @@ export class HashService {
   }
 
   async compare(password: string, passwordHash: string): Promise<boolean> {
-    const isValidPass = await bcrypt.compare(password, passwordHash);
-    if (!isValidPass) {
-      this.logger.warn('Password does not match');
-      throw AppError.badRequest('Password not match');
-    }
-    return isValidPass;
+    return await bcrypt.compare(password, passwordHash);
   }
 
   async same(password: string, passwordHash: string): Promise<boolean> {

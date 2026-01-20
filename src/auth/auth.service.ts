@@ -269,7 +269,11 @@ export class AuthService {
       }
 
       // Verify password
-      await this.hashService.compare(data.password, user.passwordHash);
+      const isPasswordValid = await this.hashService.compare(data.password, user.passwordHash);
+      if (!isPasswordValid) {
+        this.logger.warn(`Invalid password for user with email: ${data.email}`);
+        throw AppError.unauthorized('Invalid email or password');
+      }
 
       // Update last login timestamp
       await this.userRepository.updateUser({
