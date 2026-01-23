@@ -6,7 +6,7 @@ export class HealthCheckService {
   constructor(private readonly prisma: PrismaService) {}
   protected readonly logger = new Logger(HealthCheckService.name);
 
-  async checkDatabaseConnection() {
+  async checkDatabaseConnection(): Promise<boolean> {
     this.logger.log('Checking database connection...');
     try {
       await this.prisma.$queryRaw`SELECT 1`;
