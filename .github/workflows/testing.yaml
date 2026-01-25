@@ -31,9 +31,6 @@ jobs:
       - name: Run tests
         run: npm run test
 
-      - name: Generate coverage report
-        run: npm run test:cov
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,10 +46,3 @@ jobs:
           path: reports/junit/test-results.xml
           reporter: jest-junit
           fail-on-error: false
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage
