@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 
-import { HEALTH_CHECK_SERVICE_NAME, HealthCheckResponse } from 'src/generated-types/health-check';
+import { HEALTH_CHECK_SERVICE_NAME, type HealthCheckResponse } from 'src/generated-types/health-check';
 import { HealthCheckService } from './health-check.service';
 
 @Controller()
