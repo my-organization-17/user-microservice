@@ -34,9 +34,9 @@ export class AuthService {
     this.messageBrokerService.emitMessage('notification.email.send', {
       to,
       subject: 'Verify your email',
-      html: `<h2>Please verify your email</h2><p>Hello ${name || 'New User'},</p><p>Click <a href="https://yourapp.com/verify-email?token=${token}">here</a> to verify your email.</p>`,
+      template: 'verify-email',
       context: {
-        name: name || 'User',
+        name: name || 'New User',
         verificationLink: `https://yourapp.com/verify-email?token=${token}`,
       },
     } as EmailRequest);
@@ -46,7 +46,7 @@ export class AuthService {
     this.messageBrokerService.emitMessage('notification.email.send', {
       to,
       subject: 'Reset your password',
-      html: `<h2>Password Reset Request</h2><p>Hello ${name || 'User'},</p><p>Click <a href="https://yourapp.com/reset-password?token=${token}">here</a> to reset your password.</p>`,
+      template: 'reset-password',
       context: {
         name: name || 'User',
         resetLink: `https://yourapp.com/reset-password?token=${token}`,
