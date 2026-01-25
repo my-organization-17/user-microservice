@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { HashModule } from './hash/hash.module';
 import { RedisModule } from './redis/redis.module';
 import { TokenModule } from './token/token.module';
+import { MessageBrokerModule } from './transport/message-broker/message-broker.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TokenModule } from './token/token.module';
     HashModule,
     RedisModule,
     TokenModule,
+    MessageBrokerModule,
   ],
   controllers: [],
   providers: [],

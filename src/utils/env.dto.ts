@@ -1,11 +1,14 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUrl } from 'class-validator';
 
 export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   readonly TRANSPORT_URL: string;
 
-  @IsString()
+  @IsUrl(
+    { protocols: ['postgres', 'postgresql'], require_tld: false, require_protocol: true },
+    { message: 'DATABASE_URL must be a valid Postgres URL' },
+  )
   @IsNotEmpty()
   readonly DATABASE_URL: string;
 
@@ -35,4 +38,12 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   @IsPositive()
   readonly REDIS_PORT: number;
+
+  @IsUrl({ protocols: ['amqp', 'amqps'], require_tld: false }, { message: 'RABBITMQ_URL must be a valid AMQP URL' })
+  @IsNotEmpty()
+  readonly RABBITMQ_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly RABBITMQ_QUEUE: string;
 }

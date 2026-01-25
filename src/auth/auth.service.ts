@@ -7,10 +7,12 @@ import { UserRepository } from 'src/user/user.repository';
 import { AppError } from 'src/utils/errors/app-error';
 import { convertEnum } from 'src/utils/convertEnum';
 import { RedisService } from 'src/redis/redis.service';
+import { MessageBrokerService } from 'src/transport/message-broker/message-broker.service';
 import { AuthRepository } from './auth.repository';
 
 import { type StatusResponse, UserRole, type User } from 'src/generated-types/user';
 import type { AuthResponse, RefreshTokensResponse, SignInRequest, SignUpRequest } from 'src/generated-types/auth';
+import type { EmailRequest } from 'src/transport/message-broker/email.request.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +22,36 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
     private readonly redisService: RedisService,
+    private readonly messageBrokerService: MessageBrokerService,
   ) {}
   protected readonly logger = new Logger(AuthService.name);
 
   private generateCryptoToken(): string {
     return crypto.randomBytes(32).toString('hex');
+  }
+
+  private sendVerificationEmail(to: string, token: string, name?: string | null): void {
+    this.messageBrokerService.emitMessage('notification.email.send', {
+      to,
+      subject: 'Verify your email',
+      html: `<h2>Please verify your email</h2><p>Hello ${name || 'New User'},</p><p>Click <a href="https://yourapp.com/verify-email?token=${token}">here</a> to verify your email.</p>`,
+      context: {
+        name: name || 'User',
+        verificationLink: `https://yourapp.com/verify-email?token=${token}`,
+      },
+    } as EmailRequest);
+  }
+
+  private sendPasswordResetEmail(to: string, token: string, name?: string | null): void {
+    this.messageBrokerService.emitMessage('notification.email.send', {
+      to,
+      subject: 'Reset your password',
+      html: `<h2>Password Reset Request</h2><p>Hello ${name || 'User'},</p><p>Click <a href="https://yourapp.com/reset-password?token=${token}">here</a> to reset your password.</p>`,
+      context: {
+        name: name || 'User',
+        resetLink: `https://yourapp.com/reset-password?token=${token}`,
+      },
+    } as EmailRequest);
   }
 
   async signUp(data: SignUpRequest): Promise<User> {
@@ -45,6 +72,7 @@ export class AuthService {
             token,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
+          this.sendVerificationEmail(existingUser.email, token, existingUser.name);
           this.logger.log(`Resent email verification token for user ID: ${existingUser.id}`);
           throw AppError.conflict('Email is already in use but not verified. Verification email resent.');
         }
@@ -55,8 +83,8 @@ export class AuthService {
             token,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
+          this.sendVerificationEmail(existingUser.email, token, existingUser.name);
           this.logger.log(`Resent expired email verification token for user ID: ${existingUser.id}`);
-          throw AppError.conflict('Email is already in use but not verified. Verification email resent.');
         }
         this.logger.warn(`Email is already in use: ${data.email}`);
         throw AppError.conflict(
@@ -79,6 +107,9 @@ export class AuthService {
         token,
         expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
       });
+
+      // Send verification email
+      this.sendVerificationEmail(newUser.email, token, newUser.name);
 
       this.logger.log(`User created with ID: ${newUser.id}`);
       return {
@@ -113,6 +144,7 @@ export class AuthService {
           token,
           expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
         });
+        this.sendVerificationEmail(user.email, token, user.name);
         this.logger.log(`Updated email verification token for user ID: ${user.id}`);
       } else {
         await this.authRepository.createEmailVerificationToken({
@@ -120,6 +152,7 @@ export class AuthService {
           token,
           expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
         });
+        this.sendVerificationEmail(user.email, token, user.name);
         this.logger.log(`Created email verification token for user ID: ${user.id}`);
       }
 
@@ -206,6 +239,7 @@ export class AuthService {
             token,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
+          this.sendVerificationEmail(user.email, token, user.name);
           this.logger.log(`Resent email verification token for user ID: ${user.id}`);
           throw AppError.unauthorized('Email not verified. Verification email resent.');
         }
@@ -216,6 +250,7 @@ export class AuthService {
             token,
             expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
           });
+          this.sendVerificationEmail(user.email, token, user.name);
           this.logger.log(`Resent expired email verification token for user ID: ${user.id}`);
           throw AppError.unauthorized('Email not verified. Verification email resent.');
         }
@@ -358,6 +393,10 @@ export class AuthService {
       this.logger.log(`Created password reset token for user ID: ${user.id}`);
     }
 
+    // Send password reset email
+    this.sendPasswordResetEmail(user.email, token, user.name);
+    this.logger.log(`Password reset email sent to user ID: ${user.id}`);
+
     return { success: true, message: 'Password reset token generated successfully' };
   }
 
@@ -380,7 +419,10 @@ export class AuthService {
       throw AppError.badRequest('No valid password reset token found. Please initiate password reset again.');
     }
 
-    this.logger.log(`Password reset token resent for user ID: ${user.id}`);
+    // Resend password reset email
+    this.sendPasswordResetEmail(user.email, passwordReset.token, user.name);
+    this.logger.log(`Password reset email resent to user ID: ${user.id}`);
+
     return { success: true, message: 'Password reset email resent successfully' };
   }
 
