@@ -31,4 +31,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jest-test-results
-          path: reports/test-results.xml
+          path: reports/junit/test-results.xml
+
+      - name: Publish Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Jest Tests
+          path: reports/junit/test-results.xml
+          reporter: jest-junit
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
