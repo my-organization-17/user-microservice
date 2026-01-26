@@ -65,6 +65,12 @@ describe('UserService', () => {
 
       await expect(service.getUserById('user-1')).rejects.toBeInstanceOf(AppError);
     });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.getUserById('user-1')).rejects.toBeInstanceOf(AppError);
+    });
   });
 
   describe('updateUser', () => {
@@ -82,6 +88,19 @@ describe('UserService', () => {
 
       expect(result.name).toBe('New Name');
       expect(userRepositoryMock.updateUser).toHaveBeenCalled();
+    });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.updateUser({ id: 'user-1', name: 'New Name' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.updateUser.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.updateUser({ id: 'user-1', name: 'New Name' })).rejects.toBeInstanceOf(AppError);
     });
   });
 
@@ -120,17 +139,63 @@ describe('UserService', () => {
   describe('changePassword', () => {
     it('should change password', async () => {
       userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+
       hashServiceMock.same.mockResolvedValue(false);
       hashServiceMock.create.mockResolvedValue('new-hash');
+
+      userRepositoryMock.updateUser.mockResolvedValue({
+        ...baseUser,
+        passwordHash: 'new-hash',
+      });
 
       const result = await service.changePassword({
         id: 'user-1',
         password: 'new-password',
       });
 
-      expect(hashServiceMock.create).toHaveBeenCalled();
-      expect(userRepositoryMock.updateUser).toHaveBeenCalled();
-      expect(result.success).toBe(true);
+      expect(hashServiceMock.same).toHaveBeenCalledWith('new-password', baseUser.passwordHash);
+
+      expect(hashServiceMock.create).toHaveBeenCalledWith('new-password');
+
+      expect(userRepositoryMock.updateUser).toHaveBeenCalledWith({
+        id: 'user-1',
+        data: { passwordHash: 'new-hash' },
+      });
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Password changed successfully',
+      });
+    });
+
+    it('should throw if new password is same as old password', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+
+      hashServiceMock.same.mockRejectedValue(AppError.badRequest('New password must be different from the old one'));
+
+      await expect(
+        service.changePassword({
+          id: 'user-1',
+          password: 'same-password',
+        }),
+      ).rejects.toBeInstanceOf(AppError);
+
+      expect(userRepositoryMock.updateUser).not.toHaveBeenCalled();
+    });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.changePassword({ id: 'user-1', password: 'new-password' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      hashServiceMock.same.mockResolvedValue(false);
+      hashServiceMock.create.mockResolvedValue('new-hash');
+      userRepositoryMock.updateUser.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.changePassword({ id: 'user-1', password: 'new-password' })).rejects.toBeInstanceOf(AppError);
     });
   });
 

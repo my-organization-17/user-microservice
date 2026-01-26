@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="62" failures="0" errors="0" time="5.019">
+  <testsuite name="HealthCheckController" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="3.609" tests="4">
+    <testcase classname="HealthCheckController should be defined" name="HealthCheckController should be defined" time="0.02">
+    </testcase>
+    <testcase classname="HealthCheckController checkHealth should return healthy app response" name="HealthCheckController checkHealth should return healthy app response" time="0.002">
+    </testcase>
+    <testcase classname="HealthCheckController checkDatabaseConnection should return healthy response when DB is healthy" name="HealthCheckController checkDatabaseConnection should return healthy response when DB is healthy" time="0.001">
+    </testcase>
+    <testcase classname="HealthCheckController checkDatabaseConnection should return unhealthy response when DB is down" name="HealthCheckController checkDatabaseConnection should return unhealthy response when DB is down" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="UserController" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.192" tests="11">
+    <testcase classname="UserController should be defined" name="UserController should be defined" time="0.025">
+    </testcase>
+    <testcase classname="UserController getUserById should call userService.getUserById" name="UserController getUserById should call userService.getUserById" time="0.002">
+    </testcase>
+    <testcase classname="UserController updateUser should call userService.updateUser" name="UserController updateUser should call userService.updateUser" time="0.004">
+    </testcase>
+    <testcase classname="UserController deleteUser should call userService.deleteUser" name="UserController deleteUser should call userService.deleteUser" time="0.004">
+    </testcase>
+    <testcase classname="UserController confirmPassword should call userService.confirmPassword" name="UserController confirmPassword should call userService.confirmPassword" time="0.008">
+    </testcase>
+    <testcase classname="UserController changePassword should call userService.changePassword" name="UserController changePassword should call userService.changePassword" time="0.005">
+    </testcase>
+    <testcase classname="UserController banUser should call userService.banUser" name="UserController banUser should call userService.banUser" time="0.001">
+    </testcase>
+    <testcase classname="UserController unbanUser should call userService.unbanUser" name="UserController unbanUser should call userService.unbanUser" time="0.001">
+    </testcase>
+    <testcase classname="UserController getBannedUsers should call userService.getBannedUsers" name="UserController getBannedUsers should call userService.getBannedUsers" time="0.006">
+    </testcase>
+    <testcase classname="UserController getBanDetailsByUserId should call userService.getBanDetailsByUserId" name="UserController getBanDetailsByUserId should call userService.getBanDetailsByUserId" time="0.014">
+    </testcase>
+    <testcase classname="UserController changeUserRole should call userService.changeUserRole" name="UserController changeUserRole should call userService.changeUserRole" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="AuthService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.268" tests="1">
+    <testcase classname="AuthService should be defined" name="AuthService should be defined" time="0.015">
+    </testcase>
+  </testsuite>
+  <testsuite name="TokenService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:51" time="0.52" tests="5">
+    <testcase classname="TokenService should be defined" name="TokenService should be defined" time="0.002">
+    </testcase>
+    <testcase classname="TokenService refreshKey should build correct redis key" name="TokenService refreshKey should build correct redis key" time="0">
+    </testcase>
+    <testcase classname="TokenService verifyJwtToken should verify access token with access secret" name="TokenService verifyJwtToken should verify access token with access secret" time="0">
+    </testcase>
+    <testcase classname="TokenService verifyJwtToken should verify refresh token with refresh secret" name="TokenService verifyJwtToken should verify refresh token with refresh secret" time="0.001">
+    </testcase>
+    <testcase classname="TokenService generateJwtTokens should generate tokens, hash refresh token and store it in redis" name="TokenService generateJwtTokens should generate tokens, hash refresh token and store it in redis" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="AuthController" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.244" tests="1">
+    <testcase classname="AuthController should be defined" name="AuthController should be defined" time="0.018">
+    </testcase>
+  </testsuite>
+  <testsuite name="RedisService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.309" tests="1">
+    <testcase classname="RedisService should be defined" name="RedisService should be defined" time="0.017">
+    </testcase>
+  </testsuite>
+  <testsuite name="HashService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:51" time="0.117" tests="8">
+    <testcase classname="HashService should be defined" name="HashService should be defined" time="0.001">
+    </testcase>
+    <testcase classname="HashService create should create password hash" name="HashService create should create password hash" time="0.002">
+    </testcase>
+    <testcase classname="HashService create should throw error if hash creation fails" name="HashService create should throw error if hash creation fails" time="0.002">
+    </testcase>
+    <testcase classname="HashService compare should return true when passwords match" name="HashService compare should return true when passwords match" time="0.002">
+    </testcase>
+    <testcase classname="HashService compare should return false when passwords do not match" name="HashService compare should return false when passwords do not match" time="0.001">
+    </testcase>
+    <testcase classname="HashService same should throw error if passwords are the same" name="HashService same should throw error if passwords are the same" time="0">
+    </testcase>
+    <testcase classname="HashService same should return false if passwords are different" name="HashService same should return false if passwords are different" time="0.001">
+    </testcase>
+    <testcase classname="HashService validate should validate token against hash" name="HashService validate should validate token against hash" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="UserRepository" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:51" time="0.182" tests="9">
+    <testcase classname="UserRepository should be defined" name="UserRepository should be defined" time="0.003">
+    </testcase>
+    <testcase classname="UserRepository findUserByEmail should call prisma.user.findUnique with email" name="UserRepository findUserByEmail should call prisma.user.findUnique with email" time="0.001">
+    </testcase>
+    <testcase classname="UserRepository findUserById should call prisma.user.findUnique with id" name="UserRepository findUserById should call prisma.user.findUnique with id" time="0.001">
+    </testcase>
+    <testcase classname="UserRepository createUser should create a user with correct data" name="UserRepository createUser should create a user with correct data" time="0">
+    </testcase>
+    <testcase classname="UserRepository updateUser should update user" name="UserRepository updateUser should update user" time="0.002">
+    </testcase>
+    <testcase classname="UserRepository deleteUser should delete user by id" name="UserRepository deleteUser should delete user by id" time="0.001">
+    </testcase>
+    <testcase classname="UserRepository getBannedUsers should fetch banned users" name="UserRepository getBannedUsers should fetch banned users" time="0.001">
+    </testcase>
+    <testcase classname="UserRepository getBanDetailsByUserId should fetch ban details by user id" name="UserRepository getBanDetailsByUserId should fetch ban details by user id" time="0.001">
+    </testcase>
+    <testcase classname="UserRepository createBanDetails should create ban details" name="UserRepository createBanDetails should create ban details" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="UserService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.396" tests="19">
+    <testcase classname="UserService should be defined" name="UserService should be defined" time="0.011">
+    </testcase>
+    <testcase classname="UserService getUserById should return user when found" name="UserService getUserById should return user when found" time="0.001">
+    </testcase>
+    <testcase classname="UserService getUserById should throw not found if user does not exist" name="UserService getUserById should throw not found if user does not exist" time="0.003">
+    </testcase>
+    <testcase classname="UserService getUserById should throw internal server error on repository failure" name="UserService getUserById should throw internal server error on repository failure" time="0.001">
+    </testcase>
+    <testcase classname="UserService updateUser should update and return user" name="UserService updateUser should update and return user" time="0.002">
+    </testcase>
+    <testcase classname="UserService updateUser should throw not found if user does not exist" name="UserService updateUser should throw not found if user does not exist" time="0.001">
+    </testcase>
+    <testcase classname="UserService updateUser should throw internal server error on repository failure" name="UserService updateUser should throw internal server error on repository failure" time="0.002">
+    </testcase>
+    <testcase classname="UserService deleteUser should delete user" name="UserService deleteUser should delete user" time="0.002">
+    </testcase>
+    <testcase classname="UserService confirmPassword should confirm password" name="UserService confirmPassword should confirm password" time="0.002">
+    </testcase>
+    <testcase classname="UserService confirmPassword should throw if password is invalid" name="UserService confirmPassword should throw if password is invalid" time="0.004">
+    </testcase>
+    <testcase classname="UserService changePassword should change password" name="UserService changePassword should change password" time="0.004">
+    </testcase>
+    <testcase classname="UserService changePassword should throw if new password is same as old password" name="UserService changePassword should throw if new password is same as old password" time="0.005">
+    </testcase>
+    <testcase classname="UserService changePassword should throw not found if user does not exist" name="UserService changePassword should throw not found if user does not exist" time="0">
+    </testcase>
+    <testcase classname="UserService changePassword should throw internal server error on repository failure" name="UserService changePassword should throw internal server error on repository failure" time="0.011">
+    </testcase>
+    <testcase classname="UserService banUser should ban user" name="UserService banUser should ban user" time="0.002">
+    </testcase>
+    <testcase classname="UserService unbanUser should unban user" name="UserService unbanUser should unban user" time="0.001">
+    </testcase>
+    <testcase classname="UserService getBannedUsers should return banned users" name="UserService getBannedUsers should return banned users" time="0">
+    </testcase>
+    <testcase classname="UserService getBanDetailsByUserId should return ban details" name="UserService getBanDetailsByUserId should return ban details" time="0.001">
+    </testcase>
+    <testcase classname="UserService changeUserRole should change user role" name="UserService changeUserRole should change user role" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="HealthCheckService" errors="0" failures="0" skipped="0" timestamp="2026-01-26T20:58:47" time="4.428" tests="3">
+    <testcase classname="HealthCheckService should be defined" name="HealthCheckService should be defined" time="0.01">
+    </testcase>
+    <testcase classname="HealthCheckService checkDatabaseConnection should return true when database is reachable" name="HealthCheckService checkDatabaseConnection should return true when database is reachable" time="0.001">
+    </testcase>
+    <testcase classname="HealthCheckService checkDatabaseConnection should return false when database throws error" name="HealthCheckService checkDatabaseConnection should return false when database throws error" time="0.003">
+    </testcase>
+  </testsuite>
+</testsuites>
