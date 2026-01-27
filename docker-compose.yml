@@ -6,8 +6,6 @@ services:
       - ./.env.docker
     volumes:
       - user-db-data:/var/lib/postgresql/data/18
-    ports:
-      - 5433:5432
     networks:
       - coffeedoor-network
 
