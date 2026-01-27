@@ -1,0 +1,51 @@
+services:
+  user-database:
+    container_name: user-database
+    image: postgres:latest
+    env_file:
+      - ./.env.docker
+    volumes:
+      - user-db-data:/var/lib/postgresql/data/18
+    ports:
+      - 5433:5432
+    networks:
+      - coffeedoor-network
+
+  user-redis-db:
+    container_name: user-redis-db
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - coffeedoor-network
+
+  user-app:
+    container_name: user-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5002:5002
+    env_file:
+      - ./.env.docker
+    depends_on:
+      - user-database
+      - user-redis-db
+    networks:
+      - coffeedoor-network
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - coffeedoor-network
+
+networks:
+  coffeedoor-network:
+      external: true
+
+volumes:
+  user-db-data:
+  user-redis-db-data:
