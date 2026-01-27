@@ -19,6 +19,7 @@ services:
 
   user-app:
     container_name: user-app
+    image: user-microservice:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,14 +30,6 @@ services:
     depends_on:
       - user-database
       - user-redis-db
-    networks:
-      - coffeedoor-network
-
-  adminer:
-    container_name: adminer
-    image: adminer
-    ports:
-      - 8080:8080
     networks:
       - coffeedoor-network
 
