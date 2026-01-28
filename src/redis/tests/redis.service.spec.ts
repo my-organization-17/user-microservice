@@ -1,24 +1,30 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+
+const mockOn = jest.fn();
+const mockPing = jest.fn().mockResolvedValue('PONG');
+const mockQuit = jest.fn().mockResolvedValue('OK');
+
+jest.mock('ioredis', () => {
+  return {
+    default: class MockRedis {
+      on = mockOn;
+      ping = mockPing;
+      quit = mockQuit;
+      constructor() {}
+    },
+    __esModule: true,
+  };
+});
 
 import { RedisService } from '../redis.service';
 
 describe('RedisService', () => {
-  let service: RedisService;
-
   const configServiceMock = {
     getOrThrow: jest.fn(),
   };
 
-  jest.mock('ioredis', () => {
-    return jest.fn().mockImplementation(() => ({
-      on: jest.fn(),
-      ping: jest.fn(),
-      quit: jest.fn(),
-    }));
-  });
-
-  beforeEach(async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     configServiceMock.getOrThrow.mockImplementation((key: string) => {
       switch (key) {
         case 'REDIS_HOST':
@@ -27,21 +33,53 @@ describe('RedisService', () => {
           return 6379;
       }
     });
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [RedisService, { provide: ConfigService, useValue: configServiceMock }],
-    }).compile();
-
-    service = module.get<RedisService>(RedisService);
-
-    jest.clearAllMocks();
-  });
-
-  afterAll(async () => {
-    await service.quit();
   });
 
   it('should be defined', () => {
+    const service = new RedisService(configServiceMock as unknown as ConfigService);
+
     expect(service).toBeDefined();
+  });
+
+  it('should call configService.getOrThrow with REDIS_HOST and REDIS_PORT', () => {
+    new RedisService(configServiceMock as unknown as ConfigService);
+
+    expect(configServiceMock.getOrThrow).toHaveBeenCalledWith('REDIS_HOST');
+    expect(configServiceMock.getOrThrow).toHaveBeenCalledWith('REDIS_PORT');
+  });
+
+  it('should be an instance of RedisService', () => {
+    const service = new RedisService(configServiceMock as unknown as ConfigService);
+
+    expect(service).toBeInstanceOf(RedisService);
+  });
+
+  describe('onModuleInit', () => {
+    it('should register connect and error event handlers', async () => {
+      const service = new RedisService(configServiceMock as unknown as ConfigService);
+
+      await service.onModuleInit();
+
+      expect(mockOn).toHaveBeenCalledWith('connect', expect.any(Function));
+      expect(mockOn).toHaveBeenCalledWith('error', expect.any(Function));
+    });
+
+    it('should call ping', async () => {
+      const service = new RedisService(configServiceMock as unknown as ConfigService);
+
+      await service.onModuleInit();
+
+      expect(mockPing).toHaveBeenCalled();
+    });
+  });
+
+  describe('onModuleDestroy', () => {
+    it('should call quit', async () => {
+      const service = new RedisService(configServiceMock as unknown as ConfigService);
+
+      await service.onModuleDestroy();
+
+      expect(mockQuit).toHaveBeenCalled();
+    });
   });
 });

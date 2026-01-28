@@ -113,6 +113,26 @@ describe('UserService', () => {
       expect(userRepositoryMock.deleteUser).toHaveBeenCalledWith('user-1');
       expect(result.success).toBe(true);
     });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.deleteUser('user-1')).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.deleteUser.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.deleteUser('user-1')).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should rethrow AppError from repository', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.deleteUser.mockRejectedValue(AppError.badRequest('Custom error'));
+
+      await expect(service.deleteUser('user-1')).rejects.toThrow('Custom error');
+    });
   });
 
   describe('confirmPassword', () => {
@@ -133,6 +153,19 @@ describe('UserService', () => {
       hashServiceMock.compare.mockResolvedValue(false);
 
       await expect(service.confirmPassword({ id: 'user-1', password: 'wrong' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.confirmPassword({ id: 'user-1', password: 'password' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      hashServiceMock.compare.mockRejectedValue(new Error('Hash error'));
+
+      await expect(service.confirmPassword({ id: 'user-1', password: 'password' })).rejects.toBeInstanceOf(AppError);
     });
   });
 
@@ -202,6 +235,7 @@ describe('UserService', () => {
   describe('banUser', () => {
     it('should ban user', async () => {
       userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.createBanDetails.mockResolvedValue({});
       userRepositoryMock.updateUser.mockResolvedValue({
         ...baseUser,
         isBanned: true,
@@ -214,6 +248,28 @@ describe('UserService', () => {
 
       expect(result.isBanned).toBe(true);
     });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.banUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw if user is already banned', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue({
+        ...baseUser,
+        isBanned: true,
+      });
+
+      await expect(service.banUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.createBanDetails.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.banUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
+    });
   });
 
   describe('unbanUser', () => {
@@ -222,6 +278,7 @@ describe('UserService', () => {
         ...baseUser,
         isBanned: true,
       });
+      userRepositoryMock.createBanDetails.mockResolvedValue({});
       userRepositoryMock.updateUser.mockResolvedValue({
         ...baseUser,
         isBanned: false,
@@ -233,6 +290,28 @@ describe('UserService', () => {
       });
 
       expect(result.isBanned).toBe(false);
+    });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.unbanUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw if user is not banned', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+
+      await expect(service.unbanUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue({
+        ...baseUser,
+        isBanned: true,
+      });
+      userRepositoryMock.createBanDetails.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.unbanUser({ id: 'user-1', bannedBy: 'admin' })).rejects.toBeInstanceOf(AppError);
     });
   });
 
@@ -273,6 +352,19 @@ describe('UserService', () => {
       });
 
       expect(result.role).toBe(UserRole.ADMIN);
+    });
+
+    it('should throw not found if user does not exist', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(null);
+
+      await expect(service.changeUserRole({ id: 'user-1', role: UserRole.ADMIN })).rejects.toBeInstanceOf(AppError);
+    });
+
+    it('should throw internal server error on repository failure', async () => {
+      userRepositoryMock.findUserById.mockResolvedValue(baseUser);
+      userRepositoryMock.updateUser.mockRejectedValue(new Error('DB error'));
+
+      await expect(service.changeUserRole({ id: 'user-1', role: UserRole.ADMIN })).rejects.toBeInstanceOf(AppError);
     });
   });
 });
